@@ -1,0 +1,2212 @@
+---
+title: "STAT 331 Portfolio"
+author: "Alex Lung"
+date: "11/3/2024"
+format: 
+  html: 
+    self-contained: true
+    theme: journal
+    toc: true
+layout: margin-left
+editor: visual
+execute: 
+  eval: false
+  echo: true
+code-fold: true
+code-tools: true
+---
+
+[**y Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an \_**B**\_.
+
+The work that I provided I believe is worthy of a **B** as I was able to complete a large portion of the learning targets in a sufficient manner. I do believe I did well, but there are aspects that keep me from being any higher as there are some areas, such as not utilizing the functions across() or semi_join(). Although we have learned them, I have not found a way to implement them in a way that I am comfortable with, showing I need to continue working on my confidence with new functions. The areas that I excelled would be working on my code through revisions, as I have done revisions on all of my works that have been given feedback, whether complete or incomplete.
+
+I have also been, in my opinion, a good group mate, as I do my very best to contribute when needed, and to take a back seat and hear my partner out. In my opinion,during the times that I have worked with someone, it could have been considered "fun" working on the code.
+
+Giving feedback is also an aspect that I am not perfect in as I initially misunderstood the assignment. But I continue to grow my ability to be constructive and understand how to point out the needed changes compared to subjective choices. I believe that I have improved my ability to give feedback and will continue to do so.
+
+Overall, there are areas that I am lacking, but I have also excelled in others, which, in my opinion, could balance out the overall grade.
+
+[**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code from Lab or Challenge assignments where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
+
+## Working with Data
+
+**WD-1: I can import data from a *variety* of formats (e.g., csv, xlsx, txt, etc.).**
+
+-   `csv`
+
+```{r}
+#| label: wd-1-csv
+
+#Lab 2 | Question 1.
+
+suppressMessages(evaluations <- read.csv(
+  here("data", 
+       "teacher_evals.csv")))
+
+#SuppressMessages can be removed if message : false is active. I left it here as this was what I had in my Lab 2 assignment. 
+
+```
+
+-   `xlsx`
+
+```{r}
+#| label: wd-1-xlsx
+
+#Check-in 2.3 | Question 5.
+
+agesxl <- read_xlsx(path = here::here("check-ins", "2.1-loading-data", "Ages_Data""ages.xlsx"), sheet = "ages")
+
+```
+
+-   `txt`
+
+```{r}
+#| label: wd-1-txt
+
+#Check-in 2.3 | Question 4. 
+
+ages_mystery <- read_delim(file = here::here("Week 2", "Check-ins", "Ages_Data", "ages_mystery.txt"), delim = "|")
+
+```
+
+**WD-2: I can select necessary columns from a dataset.**
+
+*For this code, I made a large amount of alterations as compared to the original code (But in the revisions submitted Oct 29. I adjusted the axis labels to fit the graph to not cause the reader to do anything odd to read them. I also changed the legend so It would not have to be hard coded to follow the trend given by the levels, this was done by using the fct_reorder2() function. Color was also updated to follow the graph, but also not be generic along with an altered theme.*
+
+```{r}
+#| label: wd-2
+
+#Lab 4 | Question 6
+
+
+library(RColorBrewer)
+
+ca_childcare |>
+  
+  select(Region, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool
+         ) |> 
+  
+  #Rename columns to prevent copying of columns
+  rename(Infant = mc_infant, 
+         Toddler = mc_toddler, 
+         Preschool = mc_preschool
+         ) |> 
+
+  group_by(study_year, 
+           Region
+           ) |>
+  
+  pivot_longer(cols = Infant:Preschool,
+               names_to = "Child_Age",
+               values_to = "Median_Price"
+               ) |>
+  
+  mutate(Child_Age = fct_relevel(Child_Age,
+                                   "Infant",
+                                   "Toddler",
+                                   "Preschool")
+    ) |>
+
+  
+  ggplot(mapping = aes(x = study_year,
+                       y = `Median_Price`,
+                       color = fct_reorder2(.f = Region, 
+                                            .x = study_year, 
+                                            .y = Median_Price)
+                       )
+         ) +
+    
+    geom_point(size = 1) +
+    
+    facet_wrap(~ `Child_Age`) +
+    
+    geom_smooth(linewidth = 0.8) +
+    
+    scale_x_continuous(breaks = seq(2008, 
+                                    2018,
+                                    by = 2)
+                       ) +
+    
+    scale_y_continuous(limits = c(100,500),
+                       breaks = seq(100, 
+                                    500, 
+                                    by = 100)
+                       ) +
+      
+    theme_light() +
+    
+    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
+      theme(
+        axis.text.x = element_text(size = 6, hjust = 0.5), 
+        axis.text.y = element_text(size = 6, hjust = 2),
+        plot.title = element_text(size = 10, vjust = 10),
+        strip.text = element_text(size = 8),   
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.8, "lines"),
+        aspect.ratio = 1.1,
+        ) +
+  
+  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
+  
+  labs(x = "Study Year",
+       y = "",
+       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
+       colour = "California Region")
+
+
+
+```
+
+**WD-3: I can filter rows from a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
+
+-   numeric
+
+*Difference in this code from the original was that I set the object to contain the code, along with adding a full_join() and filtering using the get_fit_now_memebr person id. I also added this data in an object for future use in the lab 5 assignment.*
+
+```{r}
+#| label: wd-3-numeric
+
+#Lab 5 |
+
+#| label: initial-suspect
+ 
+suspect <- drivers_license |> 
+
+#Rename id in drivers id to prevent confusion.
+  rename(drivers_id = id) |>
+
+ #Join person's data to get name of people
+  full_join(person,
+             by = join_by(
+               drivers_id == license_id
+             )
+            ) |>
+    
+  #Search for plates that have this pattern
+  filter(str_detect(plate_number, "H42W")) |>
+  
+  
+  filter(id %in% get_fit_now_member$person_id) 
+  
+suspect$name
+
+#Murderer is Jeremy Bowers as described by the witnesses
+
+
+```
+
+-   character -- specifically a string (example must use functions from **stringr**)
+
+```{r}
+#| label: wd-3-string
+
+#Lab 5 |
+
+##| label: initial-suspect
+ 
+suspect <- drivers_license |> 
+
+#Rename id in drivers id to prevent confusion.
+  rename(drivers_id = id) |>
+
+ #Join person's data to get name of people
+  full_join(person,
+             by = join_by(
+               drivers_id == license_id
+             )
+            ) |>
+    
+  #Search for plates that have this pattern
+  filter(str_detect(plate_number, "H42W")) |>
+  
+  
+  filter(id %in% get_fit_now_member$person_id) 
+  
+suspect$name
+
+
+
+#Murderer is Jeremy Bowers as described by the witnesses
+
+
+```
+
+-   factor
+
+\*#From Lab 5, the main edit was made for altering the code to accept a date, rather than using a string.
+
+*For the factoring aspect, I added as.factor function as that would alter the type to be filtering for the "murder" factor, and so it was in place to show filtering of factors, although I heard characters are a similar area.*
+
+```{r}
+#| label: wd-3-factor
+
+#Lab 5 |
+
+#| label: inspecting-crime-scene-report
+
+crime_scene_report |>
+  
+  mutate(date = ymd(date)) |>
+  
+  filter(date == mdy("January 15, 2018"), 
+           city == "SQL City",
+           type == as.factor("murder")) |>
+  
+  select(description)
+
+
+
+```
+
+-   date (example must use functions from **lubridate**)
+
+*From Lab 5, the main edit was made for altering the code to accept a date, rather than using a string.*
+
+```{r}
+#| label: wd-3-date
+
+#Lab 5 | 
+
+#| label: inspecting-crime-scene-report
+
+crime_scene_report |>
+  
+  mutate(date = ymd(date)) |>
+  
+  filter(date == mdy("January 15, 2018"), 
+           city == "SQL City",
+           type == "murder") |>
+  
+  select(description)
+
+
+
+```
+
+**WD-4: I can modify existing variables and create new variables in a dataframe for a *variety* of data types (e.g., numeric, integer, character, factor, date).**
+
+-   numeric (using `as.numeric()` is not sufficient)
+
+```{r}
+#| label: wd-4-numeric
+
+#Lab 3 | Question 9
+
+#| label: question-1-high-low
+# code chunk for Q9
+
+#This code chunk will print out the list of professors that have the highest average 
+#and lowest SET score for question 1 in ascending order. 
+teacher_evals_clean |>
+  filter(question_no == 901) |>
+  group_by(teacher_id) |>
+  summarize(avg_rating = mean(SET_score_avg)) |>
+  filter(avg_rating == max(avg_rating) | avg_rating == min(avg_rating)) |>
+  arrange(avg_rating) 
+
+```
+
+-   character -- specifically a string (example must use functions from **stringr**)
+
+```{r}
+#| label: wd-4-string
+
+#Lab 4 | Question 6
+
+
+library(RColorBrewer)
+
+ca_childcare |>
+  
+  select(Region, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool
+         ) |> 
+  
+  #Rename columns to prevent copying of columns
+  rename(Infant = mc_infant, 
+         Toddler = mc_toddler, 
+         Preschool = mc_preschool
+         ) |> 
+
+  group_by(study_year, 
+           Region
+           ) |>
+  
+  pivot_longer(cols = Infant:Preschool,
+               names_to = "Child_Age",
+               values_to = "Median_Price"
+               ) |>
+  
+  mutate(Child_Age = fct_relevel(Child_Age,
+                                   "Infant",
+                                   "Toddler",
+                                   "Preschool")
+    ) |>
+  
+
+  ggplot(mapping = aes(x = study_year,
+                       y = `Median_Price`,
+                       color = fct_reorder2(.f = Region, 
+                                            .x = study_year, 
+                                            .y = Median_Price)
+                       )
+         ) +
+    
+    geom_point(size = 1) +
+    
+    facet_wrap(~ `Child_Age`) +
+    
+    geom_smooth(linewidth = 0.8) +
+    
+    scale_x_continuous(breaks = seq(2008, 
+                                    2018,
+                                    by = 2)
+                       ) +
+    
+    scale_y_continuous(limits = c(100,500),
+                       breaks = seq(100, 
+                                    500, 
+                                    by = 100)
+                       ) +
+      
+    theme_light() +
+    
+    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
+      theme(
+        axis.text.x = element_text(size = 6, hjust = 0.5), 
+        axis.text.y = element_text(size = 6, hjust = 2),
+        plot.title = element_text(size = 10, vjust = 10),
+        strip.text = element_text(size = 8),   
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.8, "lines"),
+        aspect.ratio = 1.1,
+        ) +
+  
+  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
+  
+  labs(x = "Study Year",
+       y = "",
+       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
+       colour = "California Region")
+
+
+```
+
+-   factor (example must use functions from **forcats**)
+
+```{r}
+#| label: wd-4-factor
+
+#Lab 4 | Question 3
+
+#| label: recoding-county-to-census-regions
+
+ca_childcare <- ca_childcare |> 
+  
+  mutate(county_name = str_remove(county_name, 
+                                  " County")) |> #Remove "County" from the name.
+  
+  #This code is to set the county names to a specific region in California.
+  mutate(Region = fct_collapse(.f = county_name,
+                          
+                               "Superior California" = c("Butte", 
+                                                         "Colusa", 
+                                                         "El Dorado", 
+                                                         "Glenn", 
+                                                         "Lassen", 
+                                                         "Modoc", 
+                                                         "Nevada", 
+                                                         "Placer", 
+                                                         "Plumas", 
+                                                         "Sacramento", 
+                                                         "Shasta", 
+                                                         "Sierra", 
+                                                         "Siskiyou", 
+                                                         "Sutter", 
+                                                         "Tehama", 
+                                                         "Yolo", 
+                                                         "Yuba"),
+                               
+                               "North Coast" = c("Del Norte", 
+                                                 "Humboldt", 
+                                                 "Lake", 
+                                                 "Mendocino", 
+                                                 "Napa", 
+                                                 "Sonoma", 
+                                                 "Trinity"),
+                               
+                               "San Francisco Bay Area" = c("Alameda", 
+                                                            "Contra Costa", 
+                                                            "Marin", 
+                                                            "San Francisco",
+                                                            "San Mateo", 
+                                                            "Santa Clara", 
+                                                            "Solano"),
+                               
+                               "Northern San Joaquin Valley" = c("Alpine", 
+                                                                 "Amador", 
+                                                                 "Calaveras", 
+                                                                 "Madera", 
+                                                                 "Mariposa", 
+                                                                 "Merced", 
+                                                                 "Mono", 
+                                                                 "San Joaquin", 
+                                                                 "Stanislaus", 
+                                                                 "Tuolumne"),
+                               
+                               "Central Coast" = c("Monterey", 
+                                                   "San Benito", 
+                                                   "San Luis Obispo", 
+                                                   "Santa Barbara", 
+                                                   "Santa Cruz", 
+                                                   "Ventura"),
+                               
+                               "Southern San Joaquin Valley" = c("Fresno", 
+                                                                 "Inyo", 
+                                                                 "Kern", 
+                                                                 "Kings", 
+                                                                 "Tulare"),
+                               
+                               "Inland Empire" = c("Riverside", 
+                                                   "San Bernardino"),
+                               
+                               "Los Angeles County" = c("Los Angeles"),
+                               
+                               "Orange County" = c("Orange"),
+                               
+                               "San Diego-Imperial" = c("Imperial", 
+                                                        "San Diego")
+                               )
+         )
+
+```
+
+-   date (example must use functions from **lubridate**)
+
+```{r}
+#| label: wd-4-date
+
+#Lab 5 |
+
+#| label: inspecting-crime-scene-report
+
+crime_scene_report |>
+  
+  mutate(date = ymd(date)) |>
+  
+  filter(date == mdy("January 15, 2018"), 
+           city == "SQL City",
+           type == as.factor("murder")) |>
+  
+  select(description)
+
+```
+
+**WD-5: I can use mutating joins to combine multiple dataframes.**
+
+-   `left_join()`
+
+```{r}
+#| label: wd-5-left
+
+#Lab 5 | 
+
+facebook_event_checkin |>
+  
+  #Change the date column to real "dates"
+  mutate(date = ymd(date)) |>
+  
+  filter(event_name == "SQL Symphony Concert",
+         month(date) == 12) |>
+  
+  group_by(person_id) |>
+  
+  summarise(num_of_concert_visits = n()) |>
+  
+  filter(num_of_concert_visits == "3") |>
+  
+  left_join(person,
+            by = join_by(
+              person_id == id)
+            ) |>
+  
+  #Altered the left_join to right_join for drivers_license
+  right_join(drivers_license,
+         by = join_by(
+           license_id == id)
+         ) |>
+  
+  filter(hair_color == "red",
+         car_model == "Model S",
+         height >= "65" |
+           height <= "67"
+         ) |>
+  
+  inner_join(income,
+             join_by(ssn)) |>
+  
+  left_join(interview,
+             join_by(person_id)) |>
+
+  select(name,
+         annual_income,
+         transcript)
+
+
+```
+
+-   `right_join()` *For this code, I placed all of the functions needed to find the suspected employer into one continuous pipe. I also altered the structure of the joins, including a right_join() when joining drivers_license.*
+
+```{r}
+#| label: wd-5-right
+
+
+#Lab 5 | 
+
+facebook_event_checkin |>
+  
+  #Change the date column to real "dates"
+  mutate(date = ymd(date)) |>
+  
+  filter(event_name == "SQL Symphony Concert",
+         month(date) == 12) |>
+  
+  group_by(person_id) |>
+  
+  summarise(num_of_concert_visits = n()) |>
+  
+  filter(num_of_concert_visits == "3") |>
+  
+  left_join(person,
+            by = join_by(
+              person_id == id)
+            ) |>
+  
+  right_join(drivers_license,
+         by = join_by(
+           license_id == id)
+         ) |>
+  
+  filter(hair_color == "red",
+         car_model == "Model S",
+         height >= "65" |
+           height <= "67"
+         ) |>
+  
+  inner_join(income,
+             join_by(ssn)) |>
+  
+  left_join(interview,
+             join_by(person_id)) |>
+
+  select(name,
+         annual_income,
+         transcript)
+
+```
+
+-   `inner_join()`
+
+```{r}
+#| label: wd-5-inner
+
+#Lab 5 | 
+
+facebook_event_checkin |>
+  
+  #Change the date column to real "dates"
+  mutate(date = ymd(date)) |>
+  
+  filter(event_name == "SQL Symphony Concert",
+         month(date) == 12) |>
+  
+  group_by(person_id) |>
+  
+  summarise(num_of_concert_visits = n()) |>
+  
+  filter(num_of_concert_visits == "3") |>
+  
+  left_join(person,
+            by = join_by(
+              person_id == id)
+            ) |>
+  right_join(drivers_license,
+         by = join_by(
+           license_id == id)
+         ) |>
+  
+  filter(hair_color == "red",
+         car_model == "Model S",
+         height >= "65" |
+           height <= "67"
+         ) |>
+  
+  inner_join(income,
+             join_by(ssn)) |>
+  
+  left_join(interview,
+             join_by(person_id)) |>
+
+  select(name,
+         annual_income,
+         transcript)
+
+```
+
+-   `full_join()`
+
+*Restructured the code from the original lab to be cleaner and place into an object, along with a full_join when joining drivers_license and person.*
+
+```{r}
+#| label: wd-5-full
+
+#Lab 5
+
+#| label: initial-suspect
+ 
+suspect <- drivers_license |> 
+
+#Rename id in drivers id to prevent confusion.
+  rename(drivers_id = id) |>
+
+ #Join person's data to get name of people
+  full_join(person,
+             by = join_by(
+               drivers_id == license_id
+             )
+            ) |>
+    
+  #Search for plates that have this pattern
+  filter(str_detect(plate_number, "H42W")) |>
+  
+  
+  filter(id %in% get_fit_now_member$person_id) 
+  
+suspect$name
+
+
+
+#Murderer is Jeremy Bowers as described by the witnesses
+
+```
+
+**WD-6: I can use filtering joins to filter rows from a dataframe.**
+
+-   `semi_join()`
+
+```{r}
+#| label: wd-6-semi
+
+```
+
+-   `anti_join()`
+
+```{r}
+#| label: wd-6-anti
+
+```
+
+**WD-7: I can pivot dataframes from long to wide and visa versa**
+
+-   `pivot_longer()`
+
+```{r}
+#| label: wd-7-long
+
+#Lab 4 | Question 6
+
+
+library(RColorBrewer)
+
+ca_childcare |>
+  
+  select(Region, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool
+         ) |> 
+  
+  #Rename columns to prevent copying of columns
+  rename(Infant = mc_infant, 
+         Toddler = mc_toddler, 
+         Preschool = mc_preschool
+         ) |> 
+
+  group_by(study_year, 
+           Region
+           ) |>
+  
+  pivot_longer(cols = Infant:Preschool,
+               names_to = "Child_Age",
+               values_to = "Median_Price"
+               ) |>
+  
+  mutate(Child_Age = fct_relevel(Child_Age,
+                                   "Infant",
+                                   "Toddler",
+                                   "Preschool")
+    ) |>
+  
+
+  ggplot(mapping = aes(x = study_year,
+                       y = `Median_Price`,
+                       color = fct_reorder2(.f = Region, 
+                                            .x = study_year, 
+                                            .y = Median_Price)
+                       )
+         ) +
+    
+    geom_point(size = 1) +
+    
+    facet_wrap(~ `Child_Age`) +
+    
+    geom_smooth(linewidth = 0.8) +
+    
+    scale_x_continuous(breaks = seq(2008, 
+                                    2018,
+                                    by = 2)
+                       ) +
+    
+    scale_y_continuous(limits = c(100,500),
+                       breaks = seq(100, 
+                                    500, 
+                                    by = 100)
+                       ) +
+      
+    theme_light() +
+    
+    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
+      theme(
+        axis.text.x = element_text(size = 6, hjust = 0.5), 
+        axis.text.y = element_text(size = 6, hjust = 2),
+        plot.title = element_text(size = 10, vjust = 10),
+        strip.text = element_text(size = 8),   
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.8, "lines"),
+        aspect.ratio = 1.1,
+        ) +
+  
+  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
+  
+  labs(x = "Study Year",
+       y = "",
+       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
+       colour = "California Region")
+
+
+```
+
+-   `pivot_wider()`
+
+```{r}
+#| label: wd-7-wide
+
+#Lab 4 | Question 4
+
+#| label: median-income-by-region-over-time
+
+ca_childcare |>
+  
+  filter(study_year %in% c(2008, 
+                           2018)
+         ) |>             
+  group_by(Region, 
+           study_year) |> 
+  
+  #Take the median of household income from both years and compare them 
+  summarize(median_income = median(mhi_2018, 
+                                   na.rm = TRUE), 
+            .groups = "drop") |>
+
+  arrange(median_income) |>
+  
+  pivot_wider(names_from = study_year,                  
+              values_from = median_income) |>
+  
+  rename(Med_Income_2008 = "2008",
+         Med_Income_2018 = "2018") 
+
+```
+
+## Reproducibility
+
+**R-1: I can create professional looking, reproducible analyses using RStudio projects, Quarto documents, and the here package.**
+
+I've done this in the following provided assignments: Lab 2 (Revisions), Lab 3, Lab 4 (Revisions), Lab 5 (Revisions), Lab 3 Challenge, Lab 2 Challenge.
+
+**R-2: I can write well documented and tidy code.**
+
+-   Example of **ggplot2** plotting
+
+```{r}
+#| label: r-2-1
+
+#Lab 4 | Question 6
+
+
+library(RColorBrewer)
+
+ca_childcare |>
+  
+  select(Region, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool
+         ) |> 
+  
+  #Rename columns to prevent copying of columns
+  rename(Infant = mc_infant, 
+         Toddler = mc_toddler, 
+         Preschool = mc_preschool
+         ) |> 
+
+  group_by(study_year, 
+           Region
+           ) |>
+  
+  pivot_longer(cols = Infant:Preschool,
+               names_to = "Child_Age",
+               values_to = "Median_Price"
+               ) |>
+  
+  mutate(Child_Age = fct_relevel(Child_Age,
+                                   "Infant",
+                                   "Toddler",
+                                   "Preschool")
+    ) |>
+  
+
+  ggplot(mapping = aes(x = study_year,
+                       y = `Median_Price`,
+                       color = fct_reorder2(.f = Region, 
+                                            .x = study_year, 
+                                            .y = Median_Price)
+                       )
+         ) +
+    
+    geom_point(size = 1) +
+    
+    facet_wrap(~ `Child_Age`) +
+    
+    geom_smooth(linewidth = 0.8) +
+    
+    scale_x_continuous(breaks = seq(2008, 
+                                    2018,
+                                    by = 2)
+                       ) +
+    
+    scale_y_continuous(limits = c(100,500),
+                       breaks = seq(100, 
+                                    500, 
+                                    by = 100)
+                       ) +
+      
+    theme_light() +
+    
+    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
+      theme(
+        axis.text.x = element_text(size = 6, hjust = 0.5), 
+        axis.text.y = element_text(size = 6, hjust = 2),
+        plot.title = element_text(size = 10, vjust = 10),
+        strip.text = element_text(size = 8),   
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.8, "lines"),
+        aspect.ratio = 1.1,
+        ) +
+  
+  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
+  
+  labs(x = "Study Year",
+       y = "",
+       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
+       colour = "California Region")
+
+
+```
+
+-   Example of **dplyr** pipeline
+
+```{r}
+#| label: r-2-2
+
+#Lab 4 | Question 6
+
+
+library(RColorBrewer)
+
+ca_childcare |>
+  
+  select(Region, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool
+         ) |> 
+  
+  #Rename columns to prevent copying of columns
+  rename(Infant = mc_infant, 
+         Toddler = mc_toddler, 
+         Preschool = mc_preschool
+         ) |> 
+
+  group_by(study_year, 
+           Region
+           ) |>
+  
+  pivot_longer(cols = Infant:Preschool,
+               names_to = "Child_Age",
+               values_to = "Median_Price"
+               ) |>
+  
+  mutate(Child_Age = fct_relevel(Child_Age,
+                                   "Infant",
+                                   "Toddler",
+                                   "Preschool")
+    ) |>
+  
+
+  ggplot(mapping = aes(x = study_year,
+                       y = `Median_Price`,
+                       color = fct_reorder2(.f = Region, 
+                                            .x = study_year, 
+                                            .y = Median_Price)
+                       )
+         ) +
+    
+    geom_point(size = 1) +
+    
+    facet_wrap(~ `Child_Age`) +
+    
+    geom_smooth(linewidth = 0.8) +
+    
+    scale_x_continuous(breaks = seq(2008, 
+                                    2018,
+                                    by = 2)
+                       ) +
+    
+    scale_y_continuous(limits = c(100,500),
+                       breaks = seq(100, 
+                                    500, 
+                                    by = 100)
+                       ) +
+      
+    theme_light() +
+    
+    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
+      theme(
+        axis.text.x = element_text(size = 6, hjust = 0.5), 
+        axis.text.y = element_text(size = 6, hjust = 2),
+        plot.title = element_text(size = 10, vjust = 10),
+        strip.text = element_text(size = 8),   
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.8, "lines"),
+        aspect.ratio = 1.1,
+        ) +
+  
+  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
+  
+  labs(x = "Study Year",
+       y = "",
+       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
+       colour = "California Region")
+
+
+
+```
+
+-   Example of function formatting
+
+```{r}
+#| label: r-2-3
+
+#| label: wd-4-numeric
+
+#Lab 3 | Question 9
+
+#| label: question-1-high-low
+# code chunk for Q9
+
+#This code chunk will print out the list of professors that have the highest average 
+#and lowest SET score for question 1 in ascending order. 
+teacher_evals_clean |>
+  filter(question_no == 901) |>
+  group_by(teacher_id) |>
+  summarize(avg_rating = mean(SET_score_avg)) |>
+  filter(avg_rating == max(avg_rating) | avg_rating == min(avg_rating)) |>
+  arrange(avg_rating) 
+
+```
+
+**R-3: I can write robust programs that are resistant to changes in inputs.**
+
+-   Example -- any context
+
+```{r}
+#| label: r-3-example
+
+#Lab 5 |
+
+#| label: inspecting-crime-scene-report
+
+crime_scene_report |>
+  
+  mutate(date = ymd(date)) |>
+  
+  filter(date == mdy("January 15, 2018"), 
+           city == "SQL City",
+           type == as.factor("murder")) |>
+  
+  select(description)
+```
+
+-   Example of function stops
+
+```{r}
+#| label: r-3-function-stops
+
+```
+
+## Data Visualization & Summarization
+
+**DVS-1: I can create visualizations for a *variety* of variable types (e.g., numeric, character, factor, date)**
+
+-   at least two numeric variables
+
+```{r}
+#| label: dvs-1-num
+
+#Lab 4 | Question 7
+
+library(scales) #Load in package to use label_dollar() function
+
+ggplot(ca_childcare, 
+       mapping = aes(x = mhi_2018, 
+                     y = mc_infant)
+       ) +
+  
+  geom_point() +
+  
+   geom_smooth(method = "lm", 
+               color = "red") +  
+  
+  #Below functions add "$" infront of the axis labels
+  scale_y_continuous(label = label_dollar()
+                     ) + 
+  
+  scale_x_continuous(label = label_dollar()
+                     ) +
+  
+  labs(
+    title = "Relationship Between Median Household Income and Infant Childcare Prices",
+    subtitle = "Full-Time Median Weekly Price for Infant Childcare",
+    x = "Median Household Income (2018 dollars)",
+    y = "",
+    ) 
+
+#For this question, I added the label_dollar() function as it would provide additonal context to the graph and was suggested by Professor Theobold.
+
+```
+
+-   at least one numeric variable and one categorical variable
+
+```{r}
+#| label: dvs-2-num-cat
+
+#Lab 4 | Quetion 6
+
+#| label: recreate-plot
+
+library(RColorBrewer)
+
+ca_childcare |>
+  
+  select(Region, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool
+         ) |> 
+  
+  #Rename columns to prevent copying of columns
+  rename(Infant = mc_infant, 
+         Toddler = mc_toddler, 
+         Preschool = mc_preschool
+         ) |> 
+
+  group_by(study_year, 
+           Region
+           ) |>
+  
+  pivot_longer(cols = Infant:Preschool,
+               names_to = "Child_Age",
+               values_to = "Median_Price"
+               ) |>
+  
+  mutate(Child_Age = fct_relevel(Child_Age,
+                                   "Infant",
+                                   "Toddler",
+                                   "Preschool")
+    ) |>
+  
+
+  ggplot(mapping = aes(x = study_year,
+                       y = `Median_Price`,
+                       color = fct_reorder2(.f = Region, 
+                                            .x = study_year, 
+                                            .y = Median_Price)
+                       )
+         ) +
+    
+    geom_point(size = 1) +
+    
+    facet_wrap(~ `Child_Age`) +
+    
+    geom_smooth(linewidth = 0.8) +
+    
+    scale_x_continuous(breaks = seq(2008, 
+                                    2018,
+                                    by = 2)
+                       ) +
+    
+    scale_y_continuous(limits = c(100,500),
+                       breaks = seq(100, 
+                                    500, 
+                                    by = 100)
+                       ) +
+      
+    theme_light() +
+    
+    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
+      theme(
+        axis.text.x = element_text(size = 6, hjust = 0.5), 
+        axis.text.y = element_text(size = 6, hjust = 2),
+        plot.title = element_text(size = 10, vjust = 10),
+        strip.text = element_text(size = 8),   
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.8, "lines"),
+        aspect.ratio = 1.1,
+        ) +
+  
+  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
+  
+  labs(x = "Study Year",
+       y = "",
+       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
+       colour = "California Region")
+
+
+
+```
+
+-   at least two categorical variables
+
+```{r}
+#| label: dvs-2-cat
+
+#Lab 3 Challenge | Question 13
+
+# code chunk for Q13
+
+#Plot will be derived to show a comparison of the courses SET scores and the level of
+#seniority that the professors had for said courses. 
+ggplot(teacher_evals_compare, 
+       aes(x = sen_level,
+           fill = SET_level)) +
+  geom_bar(position = "stack") + 
+  scale_fill_manual(values = c("steelblue", "orange")) +
+  labs(
+    title = "SET Levels for Courses by Instructor Seniority",
+    x = "Seniority of Instructor",
+    y = "",
+    subtitle = "Number of Secions",
+  ) 
+
+```
+
+-   dates (timeseries plot)
+
+```{r}
+#| label: dvs-2-date
+
+#Lab 4 | Quetion 6
+
+#| label: recreate-plot
+
+library(RColorBrewer)
+
+ca_childcare |>
+  
+  select(Region, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool
+         ) |> 
+  
+  #Rename columns to prevent copying of columns
+  rename(Infant = mc_infant, 
+         Toddler = mc_toddler, 
+         Preschool = mc_preschool
+         ) |> 
+
+  group_by(study_year, 
+           Region
+           ) |>
+  
+  pivot_longer(cols = Infant:Preschool,
+               names_to = "Child_Age",
+               values_to = "Median_Price"
+               ) |>
+  
+  mutate(Child_Age = fct_relevel(Child_Age,
+                                   "Infant",
+                                   "Toddler",
+                                   "Preschool")
+    ) |>
+  
+
+  ggplot(mapping = aes(x = study_year,
+                       y = `Median_Price`,
+                       color = fct_reorder2(.f = Region, 
+                                            .x = study_year, 
+                                            .y = Median_Price)
+                       )
+         ) +
+    
+    geom_point(size = 1) +
+    
+    facet_wrap(~ `Child_Age`) +
+    
+    geom_smooth(linewidth = 0.8) +
+    
+    scale_x_continuous(breaks = seq(2008, 
+                                    2018,
+                                    by = 2)
+                       ) +
+    
+    scale_y_continuous(limits = c(100,500),
+                       breaks = seq(100, 
+                                    500, 
+                                    by = 100)
+                       ) +
+      
+    theme_light() +
+    
+    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
+      theme(
+        axis.text.x = element_text(size = 6, hjust = 0.5), 
+        axis.text.y = element_text(size = 6, hjust = 2),
+        plot.title = element_text(size = 10, vjust = 10),
+        strip.text = element_text(size = 8),   
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.8, "lines"),
+        aspect.ratio = 1.1,
+        ) +
+  
+  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
+  
+  labs(x = "Study Year",
+       y = "",
+       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
+       colour = "California Region")
+
+
+```
+
+**DVS-2: I use plot modifications to make my visualization clear to the reader.**
+
+-   I can ensure people don't tilt their head
+
+```{r}
+#| label: dvs-2-1
+
+#Lab 4 | Quetion 6
+
+#| label: recreate-plot
+
+library(RColorBrewer)
+
+ca_childcare |>
+  
+  select(Region, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool
+         ) |> 
+  
+  #Rename columns to prevent copying of columns
+  rename(Infant = mc_infant, 
+         Toddler = mc_toddler, 
+         Preschool = mc_preschool
+         ) |> 
+
+  group_by(study_year, 
+           Region
+           ) |>
+  
+  pivot_longer(cols = Infant:Preschool,
+               names_to = "Child_Age",
+               values_to = "Median_Price"
+               ) |>
+  
+  mutate(Child_Age = fct_relevel(Child_Age,
+                                   "Infant",
+                                   "Toddler",
+                                   "Preschool")
+    ) |>
+  
+
+  ggplot(mapping = aes(x = study_year,
+                       y = `Median_Price`,
+                       color = fct_reorder2(.f = Region, 
+                                            .x = study_year, 
+                                            .y = Median_Price)
+                       )
+         ) +
+    
+    geom_point(size = 1) +
+    
+    facet_wrap(~ `Child_Age`) +
+    
+    geom_smooth(linewidth = 0.8) +
+    
+    scale_x_continuous(breaks = seq(2008, 
+                                    2018,
+                                    by = 2)
+                       ) +
+    
+    scale_y_continuous(limits = c(100,500),
+                       breaks = seq(100, 
+                                    500, 
+                                    by = 100)
+                       ) +
+      
+    theme_light() +
+    
+    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
+      theme(
+        axis.text.x = element_text(size = 6, hjust = 0.5), 
+        axis.text.y = element_text(size = 6, hjust = 2),
+        plot.title = element_text(size = 10, vjust = 10),
+        strip.text = element_text(size = 8),   
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.8, "lines"),
+        aspect.ratio = 1.1,
+        ) +
+  
+  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
+  
+  labs(x = "Study Year",
+       y = "",
+       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
+       colour = "California Region")
+
+```
+
+-   I can modify the text in my plot to be more readable
+
+```{r}
+#| label: dvs-2-2
+
+#Lab 4 | Quetion 6
+
+#| label: recreate-plot
+
+library(RColorBrewer)
+
+ca_childcare |>
+  
+  select(Region, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool
+         ) |> 
+  
+  #Rename columns to prevent copying of columns
+  rename(Infant = mc_infant, 
+         Toddler = mc_toddler, 
+         Preschool = mc_preschool
+         ) |> 
+
+  group_by(study_year, 
+           Region
+           ) |>
+  
+  pivot_longer(cols = Infant:Preschool,
+               names_to = "Child_Age",
+               values_to = "Median_Price"
+               ) |>
+  
+  mutate(Child_Age = fct_relevel(Child_Age,
+                                   "Infant",
+                                   "Toddler",
+                                   "Preschool")
+    ) |>
+  
+
+  ggplot(mapping = aes(x = study_year,
+                       y = `Median_Price`,
+                       color = fct_reorder2(.f = Region, 
+                                            .x = study_year, 
+                                            .y = Median_Price)
+                       )
+         ) +
+    
+    geom_point(size = 1) +
+    
+    facet_wrap(~ `Child_Age`) +
+    
+    geom_smooth(linewidth = 0.8) +
+    
+    scale_x_continuous(breaks = seq(2008, 
+                                    2018,
+                                    by = 2)
+                       ) +
+    
+    scale_y_continuous(limits = c(100,500),
+                       breaks = seq(100, 
+                                    500, 
+                                    by = 100)
+                       ) +
+      
+    theme_light() +
+    
+    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
+      theme(
+        axis.text.x = element_text(size = 6, hjust = 0.5), 
+        axis.text.y = element_text(size = 6, hjust = 2),
+        plot.title = element_text(size = 10, vjust = 10),
+        strip.text = element_text(size = 8),   
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.8, "lines"),
+        aspect.ratio = 1.1,
+        ) +
+  
+  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
+  
+  labs(x = "Study Year",
+       y = "",
+       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
+       colour = "California Region")
+
+```
+
+-   I can reorder my legend to align with the colors in my plot
+
+```{r}
+#| label: dvs-2-3
+
+#Lab 4 | Quetion 6
+
+#| label: recreate-plot
+
+library(RColorBrewer)
+
+ca_childcare |>
+  
+  select(Region, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool
+         ) |> 
+  
+  #Rename columns to prevent copying of columns
+  rename(Infant = mc_infant, 
+         Toddler = mc_toddler, 
+         Preschool = mc_preschool
+         ) |> 
+
+  group_by(study_year, 
+           Region
+           ) |>
+  
+  pivot_longer(cols = Infant:Preschool,
+               names_to = "Child_Age",
+               values_to = "Median_Price"
+               ) |>
+  
+  mutate(Child_Age = fct_relevel(Child_Age,
+                                   "Infant",
+                                   "Toddler",
+                                   "Preschool")
+    ) |>
+  
+
+  ggplot(mapping = aes(x = study_year,
+                       y = `Median_Price`,
+                       color = fct_reorder2(.f = Region, 
+                                            .x = study_year, 
+                                            .y = Median_Price)
+                       )
+         ) +
+    
+    geom_point(size = 1) +
+    
+    facet_wrap(~ `Child_Age`) +
+    
+    geom_smooth(linewidth = 0.8) +
+    
+    scale_x_continuous(breaks = seq(2008, 
+                                    2018,
+                                    by = 2)
+                       ) +
+    
+    scale_y_continuous(limits = c(100,500),
+                       breaks = seq(100, 
+                                    500, 
+                                    by = 100)
+                       ) +
+      
+    theme_light() +
+    
+    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
+      theme(
+        axis.text.x = element_text(size = 6, hjust = 0.5), 
+        axis.text.y = element_text(size = 6, hjust = 2),
+        plot.title = element_text(size = 10, vjust = 10),
+        strip.text = element_text(size = 8),   
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.8, "lines"),
+        aspect.ratio = 1.1,
+        ) +
+  
+  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
+  
+  labs(x = "Study Year",
+       y = "",
+       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
+       colour = "California Region")
+
+```
+
+**DVS-3: I show creativity in my visualizations**
+
+-   I can use non-standard colors
+
+```{r}
+#| label: dvs-3-1
+
+#Lab 4 | Quetion 6
+
+#| label: recreate-plot
+
+library(RColorBrewer)
+
+ca_childcare |>
+  
+  select(Region, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool
+         ) |> 
+  
+  #Rename columns to prevent copying of columns
+  rename(Infant = mc_infant, 
+         Toddler = mc_toddler, 
+         Preschool = mc_preschool
+         ) |> 
+
+  group_by(study_year, 
+           Region
+           ) |>
+  
+  pivot_longer(cols = Infant:Preschool,
+               names_to = "Child_Age",
+               values_to = "Median_Price"
+               ) |>
+  
+  mutate(Child_Age = fct_relevel(Child_Age,
+                                   "Infant",
+                                   "Toddler",
+                                   "Preschool")
+    ) |>
+  
+
+  ggplot(mapping = aes(x = study_year,
+                       y = `Median_Price`,
+                       color = fct_reorder2(.f = Region, 
+                                            .x = study_year, 
+                                            .y = Median_Price)
+                       )
+         ) +
+    
+    geom_point(size = 1) +
+    
+    facet_wrap(~ `Child_Age`) +
+    
+    geom_smooth(linewidth = 0.8) +
+    
+    scale_x_continuous(breaks = seq(2008, 
+                                    2018,
+                                    by = 2)
+                       ) +
+    
+    scale_y_continuous(limits = c(100,500),
+                       breaks = seq(100, 
+                                    500, 
+                                    by = 100)
+                       ) +
+      
+    theme_light() +
+    
+    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
+      theme(
+        axis.text.x = element_text(size = 6, hjust = 0.5), 
+        axis.text.y = element_text(size = 6, hjust = 2),
+        plot.title = element_text(size = 10, vjust = 10),
+        strip.text = element_text(size = 8),   
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.8, "lines"),
+        aspect.ratio = 1.1,
+        ) +
+  
+  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
+  
+  labs(x = "Study Year",
+       y = "",
+       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
+       colour = "California Region")
+```
+
+-   I can use annotations
+
+```{r}
+#| label: dvs-3-2
+
+```
+
+-   I can be creative...
+
+```{r}
+#| label: dvs-3-3
+
+#Lab 4 | Question 6
+
+
+library(RColorBrewer)
+
+ca_childcare |>
+  
+  select(Region, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool
+         ) |> 
+  
+  #Rename columns to prevent copying of columns
+  rename(Infant = mc_infant, 
+         Toddler = mc_toddler, 
+         Preschool = mc_preschool
+         ) |> 
+
+  group_by(study_year, 
+           Region
+           ) |>
+  
+  pivot_longer(cols = Infant:Preschool,
+               names_to = "Child_Age",
+               values_to = "Median_Price"
+               ) |>
+  
+  mutate(Child_Age = fct_relevel(Child_Age,
+                                   "Infant",
+                                   "Toddler",
+                                   "Preschool")
+    ) |>
+  
+
+  ggplot(mapping = aes(x = study_year,
+                       y = `Median_Price`,
+                       color = fct_reorder2(.f = Region, 
+                                            .x = study_year, 
+                                            .y = Median_Price)
+                       )
+         ) +
+    
+    geom_point(size = 1) +
+    
+    facet_wrap(~ `Child_Age`) +
+    
+    geom_smooth(linewidth = 0.8) +
+    
+    scale_x_continuous(breaks = seq(2008, 
+                                    2018,
+                                    by = 2)
+                       ) +
+    
+    scale_y_continuous(limits = c(100,500),
+                       breaks = seq(100, 
+                                    500, 
+                                    by = 100)
+                       ) +
+      
+    theme_light() +
+    
+    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
+      theme(
+        axis.text.x = element_text(size = 6, hjust = 0.5), 
+        axis.text.y = element_text(size = 6, hjust = 2),
+        plot.title = element_text(size = 10, vjust = 10),
+        strip.text = element_text(size = 8),   
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.8, "lines"),
+        aspect.ratio = 1.1,
+        ) +
+  
+  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
+  
+  labs(x = "Study Year",
+       y = "",
+       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
+       colour = "California Region")
+
+```
+
+**DVS-4: I can calculate numerical summaries of variables.**
+
+-   Example using `summarize()`
+
+```{r}
+#| label: dvs-4-summarize
+
+#Lab 3 | Question 9
+
+#| label: question-1-high-low
+# code chunk for Q9
+
+#This code chunk will print out the list of professors that have the highest average 
+#and lowest SET score for question 1 in ascending order. 
+teacher_evals_clean |>
+  filter(question_no == 901) |>
+  group_by(teacher_id) |>
+  summarize(avg_rating = mean(SET_score_avg)) |>
+  filter(avg_rating == max(avg_rating) | avg_rating == min(avg_rating)) |>
+  arrange(avg_rating)
+```
+
+-   Example using `across()`
+
+```{r}
+#| label: dvs-4-across
+
+```
+
+**DVS-5: I can find summaries of variables across multiple groups.**
+
+-   Example 1
+
+```{r}
+#| label: dvs-5-1
+
+#Lab 3 | Question 6
+
+#| label: unique-courses
+# code chunk for Q5
+#This could display the number of unique teacher and course IDs withing the dataset.
+teacher_evals_clean |>
+  summarise(Unique_Teachers = n_distinct(teacher_id),
+            Unique_Courses = n_distinct(course_id)
+            )
+
+```
+
+-   Example 2
+
+```{r}
+#| label: dvs-5-2
+
+```
+
+**DVS-6: I can create tables which make my summaries clear to the reader.**
+
+-   Example 1
+
+```{r}
+#| label: dvs-6-1
+
+#| label: dsm-2-1
+
+#Lab 4 | Question 8
+
+reg_mod1 <- lm(mc_infant ~ mhi_2018, 
+               data = ca_childcare)
+
+summary(reg_mod1)
+
+```
+
+-   Example 2
+
+```{r}
+#| label: dvs-6-2
+
+#| label: dsm-2-2
+
+#Lab 2 | Question 17
+
+#| label: anova
+
+species_mod <- aov(weight ~ species, data = surveys)
+
+summary(species_mod)
+
+```
+
+**DVS-7: I show creativity in my tables.**
+
+-   Example 1
+
+```{r}
+#| label: dvs-7-1
+
+```
+
+-   Example 2
+
+```{r}
+#| label: dvs-7-2
+
+```
+
+## Program Efficiency
+
+**PE-1: I can write concise code which does not repeat itself.**
+
+-   using a single function call with multiple inputs (rather than multiple function calls)
+
+```{r}
+#| label: pe-1-one-call
+
+#Lab 5 |
+
+#| label: inspecting-crime-scene-report
+
+crime_scene_report |>
+  
+  mutate(date = ymd(date)) |>
+  
+  filter(date == mdy("January 15, 2018"), 
+           city == "SQL City",
+           type == as.factor("murder")) |>
+  
+  select(description)
+
+
+```
+
+-   `across()`
+
+```{r}
+#| label: pe-1-across
+
+```
+
+-   `map()` functions
+
+```{r}
+#| label: pe-1-map-1
+
+```
+
+**PE-2: I can write functions to reduce repetition in my code.**
+
+-   Function that operates on vectors
+
+```{r}
+#| label: pe-2-1
+
+```
+
+-   Function that operates on data frames
+
+```{r}
+#| label: pe-2-2
+
+```
+
+**PE-3:I can use iteration to reduce repetition in my code.**
+
+-   `across()`
+
+```{r}
+#| label: pe-3-across
+
+```
+
+-   `map()` function with **one** input (e.g., `map()`, `map_chr()`, `map_dbl()`, etc.)
+
+```{r}
+#| label: pe-3-map-1
+
+```
+
+-   `map()` function with **more than one** input (e.g., `map_2()` or `pmap()`)
+
+```{r}
+#| label: pe-3-map-2
+
+```
+
+**PE-4: I can use modern tools when carrying out my analysis.**
+
+-   I can use functions which are not superseded or deprecated
+
+```{r}
+#| label: pe-4-1 
+
+#Lab 4 | Question 6
+
+
+library(RColorBrewer)
+
+ca_childcare |>
+  
+  select(Region, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool
+         ) |> 
+  
+  #Rename columns to prevent copying of columns
+  rename(Infant = mc_infant, 
+         Toddler = mc_toddler, 
+         Preschool = mc_preschool
+         ) |> 
+
+  group_by(study_year, 
+           Region
+           ) |>
+  
+  pivot_longer(cols = Infant:Preschool,
+               names_to = "Child_Age",
+               values_to = "Median_Price"
+               ) |>
+  
+  mutate(Child_Age = fct_relevel(Child_Age,
+                                   "Infant",
+                                   "Toddler",
+                                   "Preschool")
+    ) |>
+  
+
+  ggplot(mapping = aes(x = study_year,
+                       y = `Median_Price`,
+                       color = fct_reorder2(.f = Region, 
+                                            .x = study_year, 
+                                            .y = Median_Price)
+                       )
+         ) +
+    
+    geom_point(size = 1) +
+    
+    facet_wrap(~ `Child_Age`) +
+    
+    geom_smooth(linewidth = 0.8) +
+    
+    scale_x_continuous(breaks = seq(2008, 
+                                    2018,
+                                    by = 2)
+                       ) +
+    
+    scale_y_continuous(limits = c(100,500),
+                       breaks = seq(100, 
+                                    500, 
+                                    by = 100)
+                       ) +
+      
+    theme_light() +
+    
+    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
+      theme(
+        axis.text.x = element_text(size = 6, hjust = 0.5), 
+        axis.text.y = element_text(size = 6, hjust = 2),
+        plot.title = element_text(size = 10, vjust = 10),
+        strip.text = element_text(size = 8),   
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.8, "lines"),
+        aspect.ratio = 1.1,
+        ) +
+  
+  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
+  
+  labs(x = "Study Year",
+       y = "",
+       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
+       colour = "California Region")
+
+```
+
+-   I can connect a data wrangling pipeline into a `ggplot()`
+
+```{r}
+#| label: pe-4-2
+
+#Lab 4 | Question 6
+
+
+library(RColorBrewer)
+
+ca_childcare |>
+  
+  select(Region, 
+         study_year, 
+         mc_infant, 
+         mc_toddler, 
+         mc_preschool
+         ) |> 
+  
+  #Rename columns to prevent copying of columns
+  rename(Infant = mc_infant, 
+         Toddler = mc_toddler, 
+         Preschool = mc_preschool
+         ) |> 
+
+  group_by(study_year, 
+           Region
+           ) |>
+  
+  pivot_longer(cols = Infant:Preschool,
+               names_to = "Child_Age",
+               values_to = "Median_Price"
+               ) |>
+  
+  mutate(Child_Age = fct_relevel(Child_Age,
+                                   "Infant",
+                                   "Toddler",
+                                   "Preschool")
+    ) |>
+  
+
+  ggplot(mapping = aes(x = study_year,
+                       y = `Median_Price`,
+                       color = fct_reorder2(.f = Region, 
+                                            .x = study_year, 
+                                            .y = Median_Price)
+                       )
+         ) +
+    
+    geom_point(size = 1) +
+    
+    facet_wrap(~ `Child_Age`) +
+    
+    geom_smooth(linewidth = 0.8) +
+    
+    scale_x_continuous(breaks = seq(2008, 
+                                    2018,
+                                    by = 2)
+                       ) +
+    
+    scale_y_continuous(limits = c(100,500),
+                       breaks = seq(100, 
+                                    500, 
+                                    by = 100)
+                       ) +
+      
+    theme_light() +
+    
+    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
+      theme(
+        axis.text.x = element_text(size = 6, hjust = 0.5), 
+        axis.text.y = element_text(size = 6, hjust = 2),
+        plot.title = element_text(size = 10, vjust = 10),
+        strip.text = element_text(size = 8),   
+        legend.text = element_text(size = 8),
+        legend.key.size = unit(0.8, "lines"),
+        aspect.ratio = 1.1,
+        ) +
+  
+  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
+  
+  labs(x = "Study Year",
+       y = "",
+       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
+       colour = "California Region")
+
+```
+
+## Data Simulation & Statisical Models
+
+**DSSM-1: I can simulate data from a *variety* of probability models.**
+
+-   Example 1
+
+```{r}
+#| label: dsm-1-1
+
+#Lab 3 Challenge | Question 3
+
+#| label: chi-square-test
+# code chunk for Q14
+
+#This function will provide a p-value to determine if there is a relationship between
+#the SET score of a curve and the professors seniority. 
+chisq.test(teacher_evals_compare$SET_level, teacher_evals_compare$sen_level)
+
+```
+
+-   Example 2
+
+```{r}
+#| label: dsm-1-2
+
+```
+
+**DSSM-2: I can conduct common statistical analyses in R.**
+
+-   Example 1
+
+```{r}
+#| label: dsm-2-1
+
+#Lab 4 | Question 8
+
+reg_mod1 <- lm(mc_infant ~ mhi_2018, 
+               data = ca_childcare)
+
+summary(reg_mod1)
+
+```
+
+-   Example 2
+
+```{r}
+#| label: dsm-2-2
+
+#Lab 2 | Question 17
+
+#| label: anova
+
+species_mod <- aov(weight ~ species, data = surveys)
+
+summary(species_mod)
+
+```
+
+## Revising My Thinking
+
+This assignment has given me an opportunity to look over my code and understand where I am at as an R practitioner. Although Im stilling learning, I believe I have made improvements throughout my time in this class. When looking through my older works, there were areas that I could have easily improved by altering the code to take on new functions or operations to achieve my answer. Of course, there are aspects that I need to work on, as there are functions that we have learned, but I have not fully unitlized as I have been uncomfortable with them as compared to other functions. Some of these functions include across(), semi_join(), and anti_join().
+
+## Extending My Thinking
+
+One surpising aspect that I believed helped me grow was the idea of making errors. The best way to learn is fail, which is very true but, often with failure, we have to deal with the consequences. This class has offered me the ability to gain feedback and understand what I did wrong or what I can do better. Looking through my projects, I remeber the code that was not ideal but still worked, which in itself is not bad, but having the habit of taking the easy route will not benifit my growth and understanding of R.
+
+## Peer Support & Collaboration
+
+Initially, I had a difficult time of understanding how to review the code of other student's. In my mind, I found all of their code exemplary but, I understood that I had to be critical to a certain extent, as good code and always become great code. Commoly this would be the structuring of code to be formatted in a more readable manner or functions could be replaced with one that could achieve multiple steps in one. I also did my best to balance in compliments of the code, such as design and structure of the code, as those are often up to par.
+
+In regards to by weekly pair activities, I believe that we did a great job. At first I did not enjoy the aspect that one could not just write their thoughts out but, this helped in streamlining the thinking, similar to the rubber ducky method however the duck can talk and contribute. Over time we got better at allowing one person to work their way though the problem while one focused on making the code look good. The switching also took some getting used to as when we were in the zone, we did not want to be interrupted, but this forced us to be flexible and learn how to do both jobs of developer and coder.
