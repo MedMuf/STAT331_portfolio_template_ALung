@@ -2,7 +2,7 @@
 ---
 title: "STAT 331 Portfolio"
 author: "Alex Lung"
-date: "11/3/2024"
+date: "12/8/2024"
 format: 
   html: 
     self-contained: true
@@ -40,11 +40,11 @@ Overall, there are areas that I am lacking, but I have also excelled in others, 
 
 #Lab 2 | Question 1.
 
-suppressMessages(evaluations <- read.csv(
+evaluations <- read.csv(
   here("data", 
-       "teacher_evals.csv")))
+       "teacher_evals.csv"))
 
-#SuppressMessages can be removed if message : false is active. I left it here as this was what I had in my Lab 2 assignment. 
+#SuppressMessages was removed as compared to the original code in Lab 2 | Question 1. message:false would be used to achieve the same goal across the whole document. 
 
 ```
 
@@ -55,7 +55,10 @@ suppressMessages(evaluations <- read.csv(
 
 #Check-in 2.3 | Question 5.
 
-agesxl <- read_xlsx(path = here::here("check-ins", "2.1-loading-data", "Ages_Data""ages.xlsx"), sheet = "ages")
+agesxl <- read_xlsx(path = here::here("check-ins", 
+                                      "2.1-loading-data", 
+                                      "Ages_Data""ages.xlsx"), 
+                    sheet = "ages")
 
 ```
 
@@ -66,7 +69,11 @@ agesxl <- read_xlsx(path = here::here("check-ins", "2.1-loading-data", "Ages_Dat
 
 #Check-in 2.3 | Question 4. 
 
-ages_mystery <- read_delim(file = here::here("Week 2", "Check-ins", "Ages_Data", "ages_mystery.txt"), delim = "|")
+ages_mystery <- read_delim(file = here::here("Week 2", 
+                                             "Check-ins", 
+                                             "Ages_Data", 
+                                             "ages_mystery.txt"),
+                           delim = "|")
 
 ```
 
