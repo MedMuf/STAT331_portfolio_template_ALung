@@ -79,7 +79,6 @@ ages_mystery <- read_delim(file = here::here("Week 2",
 
 **WD-2: I can select necessary columns from a dataset.**
 
-*For this code, I made a large amount of alterations as compared to the original code (But in the revisions submitted Oct 29. I adjusted the axis labels to fit the graph to not cause the reader to do anything odd to read them. I also changed the legend so It would not have to be hard coded to follow the trend given by the levels, this was done by using the fct_reorder2() function. Color was also updated to follow the graph, but also not be generic along with an altered theme.*
 
 ```{r}
 #| label: wd-2
@@ -178,31 +177,36 @@ ca_childcare |>
 ```{r}
 #| label: wd-3-numeric
 
-#Lab 5 |
+#Lab 3 Challenge | Question 4
 
-#| label: initial-suspect
- 
-suspect <- drivers_license |> 
+#| label: data-cleaning
+# code chunk for Q4
 
-#Rename id in drivers id to prevent confusion.
-  rename(drivers_id = id) |>
 
- #Join person's data to get name of people
-  full_join(person,
-             by = join_by(
-               drivers_id == license_id
-             )
-            ) |>
-    
-  #Search for plates that have this pattern
-  filter(str_detect(plate_number, "H42W")) |>
+#This code chunk will go through all of the variables that need to have their data
+# type altered to better suit it for later tasks. 
+teacher_evals_clean <- evaluations |>
   
+  rename(sex = gender) |>
   
-  filter(id %in% get_fit_now_member$person_id) 
+  filter(no_participants >= 10) |>
   
-suspect$name
+  mutate(
+    teacher_id = as.character(teacher_id),
+    no_participants = as.integer(no_participants),
+    academic_degree = as.factor(academic_degree),
+    seniority = as.numeric(seniority),
+    sex = as.factor(sex)
+  ) |>
 
-#Murderer is Jeremy Bowers as described by the witnesses
+  select(course_id, teacher_id, 
+         question_no, 
+         no_participants, 
+         resp_share, 
+         SET_score_avg, 
+         percent_failed_cur, 
+         academic_degree, 
+         seniority, sex)
 
 
 ```
@@ -3293,6 +3297,24 @@ crime_scene_report |>
 ```{r}
 #| label: r-3-function-stops
 
+#Lab 7 Challenge | Question 2
+
+#| label: function-to-change-impossible-measurements-to-NA
+
+replace_unlikely_values <- function(measurements, min_value, max_value) {
+  
+  
+  #Determine if input values fit between the min and max values
+  if(!is.numeric(measurements) || !is.numeric(min_value) || !is.numeric(max_value)) {
+    stop("All inputs must be Numeric")
+  }
+                 
+  case_when(measurements < min_value ~ NA_real_,
+            measurements > max_value ~ NA_real_,
+            .default = measurements)
+
+  
+}
 ```
 
 ## Data Visualization & Summarization
@@ -4188,86 +4210,20 @@ crime_scene_report |>
 ```{r}
 #| label: pe-4-1 
 
-#Lab 4 | Question 6
+#Lab 3 | Question 7
 
+#| label: uncovering-missing-values
+# code chunk for Q6
 
-library(RColorBrewer)
+#https://www.tidyverse.org/blog/2021/02/dplyr-1-0-4-if-any/
+#Using the if_any function, we can look through everything within the dataset to determine if any of the cells contain an 'NA'. 
 
-ca_childcare |>
+teacher_evals_clean |>
+  filter(if_any(.cols = everything(), 
+                .fns = ~ is.na(.x))
+         ) |>
+  select(everything()) 
   
-  select(Region, 
-         study_year, 
-         mc_infant, 
-         mc_toddler, 
-         mc_preschool
-         ) |> 
-  
-  #Rename columns to prevent copying of columns
-  rename(Infant = mc_infant, 
-         Toddler = mc_toddler, 
-         Preschool = mc_preschool
-         ) |> 
-
-  group_by(study_year, 
-           Region
-           ) |>
-  
-  pivot_longer(cols = Infant:Preschool,
-               names_to = "Child_Age",
-               values_to = "Median_Price"
-               ) |>
-  
-  mutate(Child_Age = fct_relevel(Child_Age,
-                                   "Infant",
-                                   "Toddler",
-                                   "Preschool")
-    ) |>
-  
-
-  ggplot(mapping = aes(x = study_year,
-                       y = `Median_Price`,
-                       color = fct_reorder2(.f = Region, 
-                                            .x = study_year, 
-                                            .y = Median_Price)
-                       )
-         ) +
-    
-    geom_point(size = 1) +
-    
-    facet_wrap(~ `Child_Age`) +
-    
-    geom_smooth(linewidth = 0.8) +
-    
-    scale_x_continuous(breaks = seq(2008, 
-                                    2018,
-                                    by = 2)
-                       ) +
-    
-    scale_y_continuous(limits = c(100,500),
-                       breaks = seq(100, 
-                                    500, 
-                                    by = 100)
-                       ) +
-      
-    theme_light() +
-    
-    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
-      theme(
-        axis.text.x = element_text(size = 6, hjust = 0.5), 
-        axis.text.y = element_text(size = 6, hjust = 2),
-        plot.title = element_text(size = 10, vjust = 10),
-        strip.text = element_text(size = 8),   
-        legend.text = element_text(size = 8),
-        legend.key.size = unit(0.8, "lines"),
-        aspect.ratio = 1.1,
-        ) +
-  
-  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
-  
-  labs(x = "Study Year",
-       y = "",
-       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
-       colour = "California Region")
 
 ```
 
