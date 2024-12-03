@@ -266,11 +266,11 @@ crime_scene_report |>
   
   filter(date == mdy("January 15, 2018"), 
            city == "SQL City",
-           type == as.factor("murder")) |>
+           type == "murder") |>
   
   select(description)
 
-
+#Added more descriptive ways to narrow down the date, without just including the specific data 
 
 ```
 
@@ -287,14 +287,14 @@ crime_scene_report |>
 
 crime_scene_report |>
   
-  mutate(date = ymd(date)) |>
+  filter(weekdays(date) %in% "Monday",  # Only Mondays in 2018 
+         year(date) == 2018,
+         city == "SQL City",
+         type == "murder") |>
   
-  filter(date == mdy("January 15, 2018"), 
-           city == "SQL City",
-           type == "murder") |>
-  
-  select(description)
+  select(description) 
 
+#Added more descriptive ways to narrow down the date, without just including the specific data
 
 
 ```
