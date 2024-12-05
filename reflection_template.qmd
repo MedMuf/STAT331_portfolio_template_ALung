@@ -1101,6 +1101,8 @@ ca_childcare |>
 ```{r}
 #| label: r-3-function-stops
 
+
+
 ```
 
 ## Data Visualization & Summarization
@@ -1460,6 +1462,8 @@ ca_childcare |>
        subtitle = "Weekly Median Price for Center-Based Childcare ($)",
        colour = "California Region")
 
+
+#I removed the tilting of the labels as to prevent the reader fro viewing the graph in an awkward way.
 ```
 
 -   I can reorder my legend to align with the colors in my plot
@@ -1743,25 +1747,37 @@ ca_childcare |>
 ```{r}
 #| label: dvs-4-summarize
 
-#Lab 3 | Question 9
+#Lab 3 | Question 6
 
-#| label: question-1-high-low
-# code chunk for Q9
-
-#This code chunk will print out the list of professors that have the highest average 
-#and lowest SET score for question 1 in ascending order. 
+#| label: unique-courses
+# code chunk for Q5
+#This could display the number of unique teacher and course IDs withing the dataset.
 teacher_evals_clean |>
-  filter(question_no == 901) |>
-  group_by(teacher_id) |>
-  summarize(avg_rating = mean(SET_score_avg)) |>
-  filter(avg_rating == max(avg_rating) | avg_rating == min(avg_rating)) |>
-  arrange(avg_rating)
+  summarise(Unique_Teachers = n_distinct(teacher_id),
+            Unique_Courses = n_distinct(course_id)
+            )
 ```
 
 -   Example using `across()`
 
 ```{r}
 #| label: dvs-4-across
+
+# Lab 7 | Question 1
+
+#| label: find-missing-values
+
+fish |>
+  summarise(
+    # Count missing values in each column
+    across(everything(), ~ sum(is.na(.)))) |>
+
+    pivot_longer(everything(), 
+                 names_to = "Variable", 
+                 values_to = "Missing_Values") |>
+  
+  # Determine the columns that have missing values. 
+    filter(Missing_Values > 0)
 
 ```
 
@@ -1772,15 +1788,25 @@ teacher_evals_clean |>
 ```{r}
 #| label: dvs-5-1
 
-#Lab 3 | Question 6
+#Lab 3 | Question 9
 
-#| label: unique-courses
-# code chunk for Q5
-#This could display the number of unique teacher and course IDs withing the dataset.
+#| label: question-1-high-low
+# code chunk for Q9
+
+#This code chunk will print out the list of professors that have the highest average 
+#and lowest SET score for question 1 in ascending order. 
 teacher_evals_clean |>
-  summarise(Unique_Teachers = n_distinct(teacher_id),
-            Unique_Courses = n_distinct(course_id)
-            )
+  
+  filter(question_no == 901) |>
+  
+  group_by(teacher_id) |>
+  
+  summarize(avg_rating = mean(SET_score_avg)) |>
+  
+  filter(avg_rating == max(avg_rating) | avg_rating == min(avg_rating)) |>
+  
+  arrange(avg_rating)
+
 
 ```
 
