@@ -1815,6 +1815,53 @@ teacher_evals_clean |>
 ```{r}
 #| label: dvs-5-2
 
+# Lab 8 | Question 3
+
+#| label: double-pivot-for-summary-table
+
+evals |>
+  #Make sure to get all the distinct teachers once, along with other variabels.
+  distinct(teacher_id, 
+           sex, 
+           seniority, 
+           academic_degree) |>
+  #Create a new column to distinguish junior and senior professors.
+  mutate(seniority_category = ifelse(seniority <= 4, 
+                                     "junior", 
+                                     "senior")) |>
+  #Take the needed variables and order them to be associated to a unique professor
+  pivot_longer(cols = c(sex, 
+                        seniority_category, 
+                        academic_degree),
+              names_to = "category_type",
+              values_to = "category") |>
+
+  group_by(category) |>
+  #Count the number of each varible
+  summarize(total = n(), .groups = "drop") |>
+  
+  pivot_wider(
+    names_from = category,
+    values_from = total
+  ) |>
+  #Frame the column header to share the original table
+  select(
+    Female = female,
+    Male = male,
+    `Junior (4 years or less)` = junior,
+    `Senior (more than 4 years)` = senior,
+    `No Degree` = no_dgr,
+    Masters = ma,
+    Doctorate = dr,
+    Professor = prof
+  ) |>
+  
+  kable() |>
+
+  #https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html
+  kable_styling(bootstrap_options = c("hover"))
+
+
 ```
 
 **DVS-6: I can create tables which make my summaries clear to the reader.**
