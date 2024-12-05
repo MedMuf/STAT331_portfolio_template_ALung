@@ -249,8 +249,6 @@ suspect$name
 
 -   factor
 
-\*#From Lab 5, the main edit was made for altering the code to accept a date, rather than using a string.
-
 *For the factoring aspect, I added as.factor function as that would alter the type to be filtering for the "murder" factor, and so it was in place to show filtering of factors, although I heard characters are a similar area.*
 
 ```{r}
@@ -266,17 +264,17 @@ crime_scene_report |>
   
   filter(date == mdy("January 15, 2018"), 
            city == "SQL City",
-           type == "murder") |>
+           type == as.factor("murder")
+         ) |>
   
   select(description)
 
-#Added more descriptive ways to narrow down the date, without just including the specific data 
+ 
 
 ```
 
 -   date (example must use functions from **lubridate**)
 
-*From Lab 5, the main edit was made for altering the code to accept a date, rather than using a string.*
 
 ```{r}
 #| label: wd-3-date
@@ -294,7 +292,9 @@ crime_scene_report |>
   
   select(description) 
 
-#Added more descriptive ways to narrow down the date, without just including the specific data
+#Added more descriptive ways to narrow down the date, without just including the specific date
+
+#Takes the year slot and and looks into specific aspects of it through lubricdate functions
 
 
 ```
@@ -306,19 +306,20 @@ crime_scene_report |>
 ```{r}
 #| label: wd-4-numeric
 
-#Lab 3 | Question 9
+# Lab 3 Challenge
 
-#| label: question-1-high-low
-# code chunk for Q9
+# code chunk for Q12
 
-#This code chunk will print out the list of professors that have the highest average 
-#and lowest SET score for question 1 in ascending order. 
-teacher_evals_clean |>
-  filter(question_no == 901) |>
-  group_by(teacher_id) |>
-  summarize(avg_rating = mean(SET_score_avg)) |>
-  filter(avg_rating == max(avg_rating) | avg_rating == min(avg_rating)) |>
-  arrange(avg_rating) 
+teacher_evals_compare <- evaluations |>
+  mutate(norm_question_no = (question_no - 900)) |>
+  filter(norm_question_no == 3) |>  
+  mutate(
+    SET_level = if_else(SET_score_avg >= 4, "excellent", "standard"), 
+    sen_level = if_else(seniority <= 4, "junior", "senior")  
+  ) |>
+  select(course_id, SET_level, sen_level)  
+
+#I inserted a new mutate function that looks to taking the question_no column and create a new colunm of the "real" question numbers
 
 ```
 
@@ -327,86 +328,87 @@ teacher_evals_clean |>
 ```{r}
 #| label: wd-4-string
 
-#Lab 4 | Question 6
+#Lab 4 | Question 3
 
+#| label: recoding-county-to-census-regions
 
-library(RColorBrewer)
-
-ca_childcare |>
+ca_childcare <- ca_childcare |> 
   
-  select(Region, 
-         study_year, 
-         mc_infant, 
-         mc_toddler, 
-         mc_preschool
-         ) |> 
+  mutate(county_name = str_remove(county_name, 
+                                  " County")) |> #Remove "County" from the name.
   
-  #Rename columns to prevent copying of columns
-  rename(Infant = mc_infant, 
-         Toddler = mc_toddler, 
-         Preschool = mc_preschool
-         ) |> 
-
-  group_by(study_year, 
-           Region
-           ) |>
-  
-  pivot_longer(cols = Infant:Preschool,
-               names_to = "Child_Age",
-               values_to = "Median_Price"
-               ) |>
-  
-  mutate(Child_Age = fct_relevel(Child_Age,
-                                   "Infant",
-                                   "Toddler",
-                                   "Preschool")
-    ) |>
-  
-
-  ggplot(mapping = aes(x = study_year,
-                       y = `Median_Price`,
-                       color = fct_reorder2(.f = Region, 
-                                            .x = study_year, 
-                                            .y = Median_Price)
-                       )
-         ) +
-    
-    geom_point(size = 1) +
-    
-    facet_wrap(~ `Child_Age`) +
-    
-    geom_smooth(linewidth = 0.8) +
-    
-    scale_x_continuous(breaks = seq(2008, 
-                                    2018,
-                                    by = 2)
-                       ) +
-    
-    scale_y_continuous(limits = c(100,500),
-                       breaks = seq(100, 
-                                    500, 
-                                    by = 100)
-                       ) +
-      
-    theme_light() +
-    
-    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
-      theme(
-        axis.text.x = element_text(size = 6, hjust = 0.5), 
-        axis.text.y = element_text(size = 6, hjust = 2),
-        plot.title = element_text(size = 10, vjust = 10),
-        strip.text = element_text(size = 8),   
-        legend.text = element_text(size = 8),
-        legend.key.size = unit(0.8, "lines"),
-        aspect.ratio = 1.1,
-        ) +
-  
-  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
-  
-  labs(x = "Study Year",
-       y = "",
-       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
-       colour = "California Region")
+  #This code is to set the county names to a specific region in California.
+  mutate(Region = fct_collapse(.f = county_name,
+                          
+                               "Superior California" = c("Butte", 
+                                                         "Colusa", 
+                                                         "El Dorado", 
+                                                         "Glenn", 
+                                                         "Lassen", 
+                                                         "Modoc", 
+                                                         "Nevada", 
+                                                         "Placer", 
+                                                         "Plumas", 
+                                                         "Sacramento", 
+                                                         "Shasta", 
+                                                         "Sierra", 
+                                                         "Siskiyou", 
+                                                         "Sutter", 
+                                                         "Tehama", 
+                                                         "Yolo", 
+                                                         "Yuba"),
+                               
+                               "North Coast" = c("Del Norte", 
+                                                 "Humboldt", 
+                                                 "Lake", 
+                                                 "Mendocino", 
+                                                 "Napa", 
+                                                 "Sonoma", 
+                                                 "Trinity"),
+                               
+                               "San Francisco Bay Area" = c("Alameda", 
+                                                            "Contra Costa", 
+                                                            "Marin", 
+                                                            "San Francisco",
+                                                            "San Mateo", 
+                                                            "Santa Clara", 
+                                                            "Solano"),
+                               
+                               "Northern San Joaquin Valley" = c("Alpine", 
+                                                                 "Amador", 
+                                                                 "Calaveras", 
+                                                                 "Madera", 
+                                                                 "Mariposa", 
+                                                                 "Merced", 
+                                                                 "Mono", 
+                                                                 "San Joaquin", 
+                                                                 "Stanislaus", 
+                                                                 "Tuolumne"),
+                               
+                               "Central Coast" = c("Monterey", 
+                                                   "San Benito", 
+                                                   "San Luis Obispo", 
+                                                   "Santa Barbara", 
+                                                   "Santa Cruz", 
+                                                   "Ventura"),
+                               
+                               "Southern San Joaquin Valley" = c("Fresno", 
+                                                                 "Inyo", 
+                                                                 "Kern", 
+                                                                 "Kings", 
+                                                                 "Tulare"),
+                               
+                               "Inland Empire" = c("Riverside", 
+                                                   "San Bernardino"),
+                               
+                               "Los Angeles County" = c("Los Angeles"),
+                               
+                               "Orange County" = c("Orange"),
+                               
+                               "San Diego-Imperial" = c("Imperial", 
+                                                        "San Diego")
+                               )
+         )
 
 
 ```
@@ -507,17 +509,25 @@ ca_childcare <- ca_childcare |>
 
 #Lab 5 |
 
+```{r}
 #| label: inspecting-crime-scene-report
 
 crime_scene_report |>
   
-  mutate(date = ymd(date)) |>
+  mutate(date = ymd(date),
+         day_event = day(date),
+         month_event = month(date)) |>
+
+  filter(day_event == 15,  
+         month_event == 1,
+         city == "SQL City",
+         type == "murder") |>
   
-  filter(date == mdy("January 15, 2018"), 
-           city == "SQL City",
-           type == as.factor("murder")) |>
-  
-  select(description)
+  select(description) 
+ 
+#From the original code, I decided to create two new columns to break the date into parts such as day and month in this case.
+
+#I decided to look at the specific day (the 15th), and Janurary (in this case 1).
 
 ```
 
