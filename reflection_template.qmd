@@ -509,17 +509,16 @@ ca_childcare <- ca_childcare |>
 
 #Lab 5 |
 
-```{r}
 #| label: inspecting-crime-scene-report
 
 crime_scene_report |>
   
   mutate(date = ymd(date),
-         day_event = day(date),
-         month_event = month(date)) |>
+         crime_day = day(date),
+         crime_month = month(date)) |>
 
-  filter(day_event == 15,  
-         month_event == 1,
+  filter(crime_day == 15,  
+         crime_month == 1,
          city == "SQL City",
          type == "murder") |>
   
@@ -916,11 +915,11 @@ ca_childcare |>
          ) +
     
     geom_point(size = 1) +
-    
+  
     facet_wrap(~ `Child_Age`) +
-    
+  
     geom_smooth(linewidth = 0.8) +
-    
+  
     scale_x_continuous(breaks = seq(2008, 
                                     2018,
                                     by = 2)
@@ -1059,11 +1058,17 @@ ca_childcare |>
 
 #This code chunk will print out the list of professors that have the highest average 
 #and lowest SET score for question 1 in ascending order. 
+
 teacher_evals_clean |>
+  
   filter(question_no == 901) |>
+  
   group_by(teacher_id) |>
+  
   summarize(avg_rating = mean(SET_score_avg)) |>
+  
   filter(avg_rating == max(avg_rating) | avg_rating == min(avg_rating)) |>
+  
   arrange(avg_rating) 
 
 ```
@@ -1075,19 +1080,20 @@ teacher_evals_clean |>
 ```{r}
 #| label: r-3-example
 
-#Lab 5 |
+# Lab 4 | Question 5
 
-#| label: inspecting-crime-scene-report
-
-crime_scene_report |>
+#| label: lowest-median-weekly-price-2018
+#| 
+ca_childcare |>
   
-  mutate(date = ymd(date)) |>
+  filter(study_year == 2018) |>   
   
-  filter(date == mdy("January 15, 2018"), 
-           city == "SQL City",
-           type == as.factor("murder")) |>
+  group_by(Region) |>        
   
-  select(description)
+  summarize(median_price_2018 = median(mc_infant,
+                                       na.rm = TRUE)) |>  
+  
+  slice_min(median_price_2018) #Takes the first (lowest) value and places it by itself.
 ```
 
 -   Example of function stops
@@ -1143,114 +1149,46 @@ ggplot(ca_childcare,
 ```{r}
 #| label: dvs-2-num-cat
 
-#Lab 4 | Quetion 6
+# Lab 7 | Question 2
 
-#| label: recreate-plot
+#| label: visual-of-missing-values-over-time
 
-library(RColorBrewer)
-
-ca_childcare |>
+fish |> 
   
-  select(Region, 
-         study_year, 
-         mc_infant, 
-         mc_toddler, 
-         mc_preschool
-         ) |> 
+  #Make sure it is rows lacking wight data
+  filter(is.na(weight)) |>
   
-  #Rename columns to prevent copying of columns
-  rename(Infant = mc_infant, 
-         Toddler = mc_toddler, 
-         Preschool = mc_preschool
-         ) |> 
-
-  group_by(study_year, 
-           Region
-           ) |>
+  #Alter into a usable distincter variable
+  mutate(trip = as.factor(trip)) |>
   
-  pivot_longer(cols = Infant:Preschool,
-               names_to = "Child_Age",
-               values_to = "Median_Price"
-               ) |>
+  group_by(year, section, trip) |>
   
-  mutate(Child_Age = fct_relevel(Child_Age,
-                                   "Infant",
-                                   "Toddler",
-                                   "Preschool")
-    ) |>
+  summarise(Missing_Count = n(), .groups = "drop") |>
+
+
+  ggplot(aes(x = section, y = Missing_Count, fill = trip)) +
   
-
-  ggplot(mapping = aes(x = study_year,
-                       y = `Median_Price`,
-                       color = fct_reorder2(.f = Region, 
-                                            .x = study_year, 
-                                            .y = Median_Price)
-                       )
-         ) +
-    
-    geom_point(size = 1) +
-    
-    facet_wrap(~ `Child_Age`) +
-    
-    geom_smooth(linewidth = 0.8) +
-    
-    scale_x_continuous(breaks = seq(2008, 
-                                    2018,
-                                    by = 2)
-                       ) +
-    
-    scale_y_continuous(limits = c(100,500),
-                       breaks = seq(100, 
-                                    500, 
-                                    by = 100)
-                       ) +
-      
-    theme_light() +
-    
-    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
-      theme(
-        axis.text.x = element_text(size = 6, hjust = 0.5), 
-        axis.text.y = element_text(size = 6, hjust = 2),
-        plot.title = element_text(size = 10, vjust = 10),
-        strip.text = element_text(size = 8),   
-        legend.text = element_text(size = 8),
-        legend.key.size = unit(0.8, "lines"),
-        aspect.ratio = 1.1,
-        ) +
+  geom_bar(stat = "identity") +
   
-  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
+  facet_wrap(~ year, ncol = 5) +
   
-  labs(x = "Study Year",
-       y = "",
-       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
-       colour = "California Region")
-
-
-
-```
-
--   at least two categorical variables
-
-```{r}
-#| label: dvs-2-cat
-
-#Lab 3 Challenge | Question 13
-
-# code chunk for Q13
-
-#Plot will be derived to show a comparison of the courses SET scores and the level of
-#seniority that the professors had for said courses. 
-ggplot(teacher_evals_compare, 
-       aes(x = sen_level,
-           fill = SET_level)) +
-  geom_bar(position = "stack") + 
-  scale_fill_manual(values = c("steelblue", "orange")) +
   labs(
-    title = "SET Levels for Courses by Instructor Seniority",
-    x = "Seniority of Instructor",
+    title = "Frequency of Missing Weight Values by Year, Section, and Trip",
+    subtitle = "Count of Missing Values",
+    x = "Section",
     y = "",
-    subtitle = "Number of Secions",
-  ) 
+    fill = "Trip"
+  ) +
+  
+  theme_bw(base_size = 8) +  
+  
+  theme(
+    strip.text = element_text(size = 12),
+    aspect.ratio = 0.6,
+    panel.grid.major = element_blank()
+  ) +
+  
+  scale_fill_manual(values = c("darkcyan", "cyan2"))
 
 ```
 
