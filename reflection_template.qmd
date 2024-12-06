@@ -2050,6 +2050,20 @@ bind_rows(map_chr(surveys, typeof))
 ```{r}
 #| label: pe-2-2
 
+# Lab 7 | Question 8
+
+#| label: rescale-data-frame-function
+
+rescale_column <- function(df, columns) {
+  
+  #Added to check if the df is really a dataframe
+  stopifnot(is.data.frame(df))
+ 
+  df <- df |> 
+    mutate(across({{columns}}, rescale_01))
+  
+  return(df)
+}
 ```
 
 **PE-3:I can use iteration to reduce repetition in my code.**
@@ -2059,6 +2073,21 @@ bind_rows(map_chr(surveys, typeof))
 ```{r}
 #| label: pe-3-across
 
+# Lab 7 | Question 8
+
+#| label: rescale-data-frame-function
+
+rescale_column <- function(df, columns) {
+  
+  #Added to check if the df is really a dataframe
+  stopifnot(is.data.frame(df))
+ 
+  df <- df |> 
+    mutate(across({{columns}}, rescale_01))
+  
+  return(df)
+}
+
 ```
 
 -   `map()` function with **one** input (e.g., `map()`, `map_chr()`, `map_dbl()`, etc.)
@@ -2066,12 +2095,31 @@ bind_rows(map_chr(surveys, typeof))
 ```{r}
 #| label: pe-3-map-1
 
+# Lab 8 | Question 4
+
+#| label: map-missing-values-of-fish
+
+fish |>
+  map_int(~sum(is.na(.x))) |>
+  
+  kable(col.names = c("Variable Name", "Number of Missing Values")) |>
+
+  kable_styling(bootstrap_options = c("responsive"))
+
 ```
 
 -   `map()` function with **more than one** input (e.g., `map_2()` or `pmap()`)
 
 ```{r}
 #| label: pe-3-map-2
+
+# Lab 9 | Question 6
+
+all_simulations <- grid |> 
+  mutate(simulated_means = pmap(.l = list(n = n, df = df), 
+                                .f = simulate_means)
+         ) |> 
+  unnest(simulated_means) 
 
 ```
 
@@ -2082,86 +2130,16 @@ bind_rows(map_chr(surveys, typeof))
 ```{r}
 #| label: pe-4-1 
 
-#Lab 4 | Question 6
+#Lab 8 | Question 2
 
+#| label: map-to-mutate-columns
 
-library(RColorBrewer)
+#Apply the as.factor function to the desired variables and back into a data frame. 
+evals_factored <- evals |>
+  mutate(across(c(teacher_id, weekday, academic_degree, seniority, sex), as.factor)) |>
+  bind_cols()
 
-ca_childcare |>
-  
-  select(Region, 
-         study_year, 
-         mc_infant, 
-         mc_toddler, 
-         mc_preschool
-         ) |> 
-  
-  #Rename columns to prevent copying of columns
-  rename(Infant = mc_infant, 
-         Toddler = mc_toddler, 
-         Preschool = mc_preschool
-         ) |> 
-
-  group_by(study_year, 
-           Region
-           ) |>
-  
-  pivot_longer(cols = Infant:Preschool,
-               names_to = "Child_Age",
-               values_to = "Median_Price"
-               ) |>
-  
-  mutate(Child_Age = fct_relevel(Child_Age,
-                                   "Infant",
-                                   "Toddler",
-                                   "Preschool")
-    ) |>
-  
-
-  ggplot(mapping = aes(x = study_year,
-                       y = `Median_Price`,
-                       color = fct_reorder2(.f = Region, 
-                                            .x = study_year, 
-                                            .y = Median_Price)
-                       )
-         ) +
-    
-    geom_point(size = 1) +
-    
-    facet_wrap(~ `Child_Age`) +
-    
-    geom_smooth(linewidth = 0.8) +
-    
-    scale_x_continuous(breaks = seq(2008, 
-                                    2018,
-                                    by = 2)
-                       ) +
-    
-    scale_y_continuous(limits = c(100,500),
-                       breaks = seq(100, 
-                                    500, 
-                                    by = 100)
-                       ) +
-      
-    theme_light() +
-    
-    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
-      theme(
-        axis.text.x = element_text(size = 6, hjust = 0.5), 
-        axis.text.y = element_text(size = 6, hjust = 2),
-        plot.title = element_text(size = 10, vjust = 10),
-        strip.text = element_text(size = 8),   
-        legend.text = element_text(size = 8),
-        legend.key.size = unit(0.8, "lines"),
-        aspect.ratio = 1.1,
-        ) +
-  
-  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
-  
-  labs(x = "Study Year",
-       y = "",
-       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
-       colour = "California Region")
+str(evals_factored)
 
 ```
 
