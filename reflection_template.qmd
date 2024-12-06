@@ -2027,6 +2027,13 @@ rescale_column <- function(df, columns) {
 ```{r}
 #| label: pe-1-map-1
 
+# Lab 8 | Question 1
+
+#| label: map-data-types-of-surveys
+
+#Generate a table of the variables in the survey dataset and their variable type
+bind_rows(map_chr(surveys, typeof))
+
 ```
 
 **PE-2: I can write functions to reduce repetition in my code.**
