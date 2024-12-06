@@ -678,7 +678,7 @@ suspect$name
 #Murderer is Jeremy Bowers as described by the witnesses
 
 
-#I add a drop_na() function to deal with the useless inputs (ID's with no other information), trimming the dataframe down as we go
+#I also added a drop_na() function to deal with the useless inputs (ID's with no other information), trimming the dataframe down as we go
 ```
 
 **WD-6: I can use filtering joins to filter rows from a dataframe.**
@@ -687,6 +687,25 @@ suspect$name
 
 ```{r}
 #| label: wd-6-semi
+
+# Lab 4 | Question 4
+
+year_filter <- data.frame(study_year = c(2008, 2018))
+
+ca_childcare |>
+  semi_join(year_filter, 
+            by = "study_year") |>  # Use semi_join to filter years
+  
+  group_by(Region, study_year) |> 
+  
+  # Take the median of household income for both years
+  summarize(median_income = median(mhi_2018, na.rm = TRUE), .groups = "drop") |>
+  
+  arrange(median_income) |>
+  
+  pivot_wider(names_from = study_year, values_from = median_income) |>
+  
+  rename(Med_Income_2008 = "2008", Med_Income_2018 = "2018")
 
 ```
 
@@ -1012,7 +1031,6 @@ ca_childcare |>
 ```{r}
 #| label: r-2-3
 
-#| label: wd-4-numeric
 
 #Lab 3 | Question 9
 
@@ -1620,86 +1638,46 @@ ca_childcare |>
 ```{r}
 #| label: dvs-3-3
 
-#Lab 4 | Question 6
+#Lab 7 | Question 2
+
+#| label: visual-of-missing-values-over-time
+
+fish |> 
+  
+  #Make sure it is rows lacking wight data
+  filter(is.na(weight)) |>
+  
+  #Alter into a usable distincter variable
+  mutate(trip = as.factor(trip)) |>
+  
+  group_by(year, section, trip) |>
+  
+  summarise(Missing_Count = n(), .groups = "drop") |>
 
 
-library(RColorBrewer)
-
-ca_childcare |>
+  ggplot(aes(x = section, y = Missing_Count, fill = trip)) +
   
-  select(Region, 
-         study_year, 
-         mc_infant, 
-         mc_toddler, 
-         mc_preschool
-         ) |> 
+  geom_bar(stat = "identity") +
   
-  #Rename columns to prevent copying of columns
-  rename(Infant = mc_infant, 
-         Toddler = mc_toddler, 
-         Preschool = mc_preschool
-         ) |> 
-
-  group_by(study_year, 
-           Region
-           ) |>
+  facet_wrap(~ year, ncol = 5) +
   
-  pivot_longer(cols = Infant:Preschool,
-               names_to = "Child_Age",
-               values_to = "Median_Price"
-               ) |>
+  labs(
+    title = "Frequency of Missing Weight Values by Year, Section, and Trip",
+    subtitle = "Count of Missing Values",
+    x = "Section",
+    y = "",
+    fill = "Trip"
+  ) +
   
-  mutate(Child_Age = fct_relevel(Child_Age,
-                                   "Infant",
-                                   "Toddler",
-                                   "Preschool")
-    ) |>
+  theme_bw(base_size = 8) +  
   
-
-  ggplot(mapping = aes(x = study_year,
-                       y = `Median_Price`,
-                       color = fct_reorder2(.f = Region, 
-                                            .x = study_year, 
-                                            .y = Median_Price)
-                       )
-         ) +
-    
-    geom_point(size = 1) +
-    
-    facet_wrap(~ `Child_Age`) +
-    
-    geom_smooth(linewidth = 0.8) +
-    
-    scale_x_continuous(breaks = seq(2008, 
-                                    2018,
-                                    by = 2)
-                       ) +
-    
-    scale_y_continuous(limits = c(100,500),
-                       breaks = seq(100, 
-                                    500, 
-                                    by = 100)
-                       ) +
-      
-    theme_light() +
-    
-    #https://stackoverflow.com/questions/26894534/howto-automatically-set-fixed-coordinate-ratio-coord-fixed-when-x-and-y-axis
-      theme(
-        axis.text.x = element_text(size = 6, hjust = 0.5), 
-        axis.text.y = element_text(size = 6, hjust = 2),
-        plot.title = element_text(size = 10, vjust = 10),
-        strip.text = element_text(size = 8),   
-        legend.text = element_text(size = 8),
-        legend.key.size = unit(0.8, "lines"),
-        aspect.ratio = 1.1,
-        ) +
+  theme(
+    strip.text = element_text(size = 12),
+    aspect.ratio = 0.6,
+    panel.grid.major = element_blank()
+  ) +
   
-  scale_color_manual(values = colorRampPalette(brewer.pal(8, "Accent"))(10)) +
-  
-  labs(x = "Study Year",
-       y = "",
-       subtitle = "Weekly Median Price for Center-Based Childcare ($)",
-       colour = "California Region")
+  scale_fill_manual(values = c("darkcyan", "cyan2"))
 
 ```
 
@@ -1788,6 +1766,7 @@ evals |>
            sex, 
            seniority, 
            academic_degree) |>
+  
   #Create a new column to distinguish junior and senior professors.
   mutate(seniority_category = ifelse(seniority <= 4, 
                                      "junior", 
@@ -1923,12 +1902,75 @@ evals |>
 ```{r}
 #| label: dvs-7-1
 
+#Lab 9 | Question 7
+
+#| label: table-of-simulated Means
+all_simulations |>
+  group_by(n) |>
+  summarize(
+    mean_of_simulated_means = mean(simulated_means),
+    .groups = "drop"
+  ) |>
+  rename(
+    `Sample Size (n)` = n,
+    `Mean of Simulated Means` = mean_of_simulated_means
+  ) |>
+  
+  gt() |>
+    tab_header(
+      title = "Summary of Simulated Means",
+      subtitle = "Exploring the Means of Simulated Chi-Squared Distributions"
+    )|>
+  
+  #Format numbers within the column to specific decimal points
+    fmt_number(
+      columns = `Mean of Simulated Means`,
+      decimals = 2
+    ) |>
+    tab_style(
+      style = cell_text(font = "Arial", weight = "bold", size = px(14)),
+      locations = cells_column_labels()
+    ) |>
+    opt_row_striping()
+
 ```
 
 -   Example 2
 
 ```{r}
 #| label: dvs-7-2
+
+# Lab 9 | Question 2
+
+#| label: table-for-random-babies
+
+results_df <- enframe(results,
+                      name = "simulation_number",
+                      value = "ncorrect") |>
+  count(ncorrect) |>
+  mutate(proportion = n / sum(n)) |>
+  select(ncorrect, proportion) |>
+  
+  pivot_wider(names_from = ncorrect, 
+              values_from = proportion, 
+              names_prefix = "correct_")
+
+results_df |>
+  gt() |>
+  tab_header(
+    title = "Percentage of Correctly Returned Babies",
+    subtitle = "Based on 10,000 Random Simulations"
+  ) |>
+  fmt_percent(
+    columns = everything(), # Format all columns
+    decimals = 2 # Display percentages with two decimal places
+  ) |>
+  cols_label(
+    correct_0 = "0 Correct",
+    correct_1 = "1 Correct",
+    correct_2 = "2 Correct",
+    correct_4 = "All Correct"
+  )
 
 ```
 
@@ -1962,6 +2004,21 @@ crime_scene_report |>
 
 ```{r}
 #| label: pe-1-across
+
+# Lab 7 | Question 8
+
+#| label: rescale-data-frame-function
+
+rescale_column <- function(df, columns) {
+  
+  #Added to check if the df is really a dataframe
+  stopifnot(is.data.frame(df))
+ 
+  df <- df |> 
+    mutate(across({{columns}}, rescale_01))
+  
+  return(df)
+}
 
 ```
 
