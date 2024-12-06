@@ -17,13 +17,13 @@ code-fold: true
 code-tools: true
 ---
 
-[**y Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an \_**B**\_.
+[**y Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an \_**B+**\_.
 
-The work that I provided I believe is worthy of a **B** as I was able to complete a large portion of the learning targets in a sufficient manner. I do believe I did well, but there are aspects that keep me from being any higher as there are some areas, such as not utilizing the functions across() or semi_join(). Although we have learned them, I have not found a way to implement them in a way that I am comfortable with, showing I need to continue working on my confidence with new functions. The areas that I excelled would be working on my code through revisions, as I have done revisions on all of my works that have been given feedback, whether complete or incomplete.
+The work that I provided I believe is worthy of a **B+** as I was able to complete a large portion of the learning targets in a sufficient manner. I do believe I did well, but there are aspects that keep me from being any higher as there are some areas, such as not being well versed in using the joins as often as I should or not being more creative. I have made more attempts at implementing them in a way that I am comfortable with and can produce the needed output, but I still try to simplify the code for my sake, showing I need to continue working on my confidence with these functions. The areas that I excelled would be working on my code through revisions, as I have done revisions on all of my works that have been given feedback, whether complete or incomplete. I want to show my willingness to improve through that and how I can improve because of it. 
 
 I have also been, in my opinion, a good group mate, as I do my very best to contribute when needed, and to take a back seat and hear my partner out. In my opinion,during the times that I have worked with someone, it could have been considered "fun" working on the code.
 
-Giving feedback is also an aspect that I am not perfect in as I initially misunderstood the assignment. But I continue to grow my ability to be constructive and understand how to point out the needed changes compared to subjective choices. I believe that I have improved my ability to give feedback and will continue to do so.
+Giving feedback is also an aspect that I am not perfect in as I initially misunderstood the assignment. But I continued to grow my ability to be constructive and understand how to point out the needed changes compared to subjective choices. I believe that I have improved my ability to give feedback that is both constructive and encouraging.
 
 Overall, there are areas that I am lacking, but I have also excelled in others, which, in my opinion, could balance out the overall grade.
 
@@ -2336,7 +2336,7 @@ One surprising aspect that I believed helped me grow and will continue to help m
 
 ## Peer Support & Collaboration
 
-Initially, I had a difficult time of understanding how to review the code of other student's. In my mind, I found all of their code exemplary but, I understood that I had to be critical to a certain extent, as good code and always become great code. Commonly this would be the structuring of code to be formatted in a more readable manner or functions could be replaced with one that could achieve multiple steps in one. I also did my best to balance in compliments of the code, such as design and structure of the code, as those are often up to par.
+Initially, I had a difficult time of understanding how to review the code of other student's. In my mind, I found all of their code exemplary but, I understood that I had to be critical to a certain extent, as good code can always become great code. Commonly this would be the structuring of code, to be formatted in a more readable manner or functions could be replaced with one that could achieve multiple steps in one, making the overall chunk much more concise. I did my best to balance in compliments of the code, such as design and structure of the code, as those are often up to par. There have been times that the coder did not use a lot of effort, such as the labs which required us to make tables, and so I had to try to be a bit harsher on the criticism. 
 
 In regards to by weekly pair activities, I believe that we did a great job. At first I did not enjoy the aspect that one could not just write their thoughts out but, this helped in streamlining the thinking, similar to the rubber ducky method however the duck can talk and contribute. Over time we got better at allowing one person to work their way though the problem while one focused on making the code look good. The switching also took some getting used to as when we were in the zone, we did not want to be interrupted, but this forced us to be flexible and learn how to do both jobs of developer and coder.
 =======
