@@ -649,28 +649,32 @@ facebook_event_checkin |>
 ```{r}
 #| label: wd-5-full
 
+# Lab 5 |
+
 #| label: initial-suspect
  
+witnesses_id <- c(16371, 14887)
+
 suspect <- drivers_license |> 
 
-#Rename id in drivers id to prevent confusion.
+  # Rename id in drivers id to prevent confusion
   rename(drivers_id = id) |>
-
- #Join person's data to get name of people
-  full_join(person,
-             by = join_by(
-               drivers_id == license_id
-             )
-            ) |>
   
+  full_join(person,
+             by = join_by(drivers_id == license_id)) |>
+  
+  # Remove witnesses using an anti_join
+  anti_join(data.frame(drivers_id = witnesses_id), by = "drivers_id") |>
+  
+  # Drop useless inputs (ID's with no other information)
   drop_na() |>
   
-  #Search for plates that have this pattern
+  # Search for plates that have this pattern
   filter(str_detect(plate_number, "H42W")) |>
   
-  
+  # Filter to get only those who are in get_fit_now_member
   filter(id %in% get_fit_now_member$person_id) 
-  
+
 suspect$name
 
 
@@ -713,6 +717,40 @@ ca_childcare |>
 
 ```{r}
 #| label: wd-6-anti
+
+#Lab 5 |
+
+#| label: initial-suspect
+ 
+witnesses_id <- c(16371, 14887)
+
+suspect <- drivers_license |> 
+
+  # Rename id in drivers id to prevent confusion
+  rename(drivers_id = id) |>
+  
+  full_join(person,
+             by = join_by(drivers_id == license_id)) |>
+  
+  # Remove witnesses using an anti_join
+  anti_join(data.frame(drivers_id = witnesses_id), by = "drivers_id") |>
+  
+  # Drop useless inputs (ID's with no other information)
+  drop_na() |>
+  
+  # Search for plates that have this pattern
+  filter(str_detect(plate_number, "H42W")) |>
+  
+  # Filter to get only those who are in get_fit_now_member
+  filter(id %in% get_fit_now_member$person_id) 
+
+suspect$name
+
+
+
+#Murderer is Jeremy Bowers as described by the witnesses
+
+#I included the anti_join function here as to remove the witnesses from the dataset as they did not seem to be able to contirbute anymoe in the suspect search. Removing them would be best for narrowing down the search.
 
 ```
 
