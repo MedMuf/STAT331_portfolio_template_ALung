@@ -2061,6 +2061,25 @@ bind_rows(map_chr(surveys, typeof))
 ```{r}
 #| label: pe-2-1
 
+# Lab 7 Challenge | Question 2
+
+#| label: function-to-change-impossible-measurements-to-NA
+
+replace_unlikely_values <- function(measurements, min_value, max_value) {
+  
+  
+  #Determine if input values fit between the min and max values
+  if(!is.numeric(measurements) || !is.numeric(min_value) || !is.numeric(max_value)) {
+    stop("All inputs must be Numeric")
+  }
+                 
+  case_when(measurements < min_value ~ NA_real_,
+            measurements > max_value ~ NA_real_,
+            .default = measurements)
+
+  
+}
+
 ```
 
 -   Function that operates on data frames
