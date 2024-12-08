@@ -25,7 +25,7 @@ I have also been, in my opinion, a good group mate, as I do my very best to cont
 
 Giving feedback is also an aspect that I am not perfect in as I initially misunderstood the assignment. But I continued to grow my ability to be constructive and understand how to point out the needed changes compared to subjective choices. I believe that I have improved my ability to give feedback that is both constructive and encouraging.
 
-Overall, there are areas that I am lacking, but I have also excelled in others, which, in my opinion, could balance out the overall grade.
+Overall, there are areas that I could improve on, but I have exercised the knowledge that I obtained to the best of my abilities in a way that I believe meet a majority of the learning objectives that are proposed. 
 
 [**Learning Objective Evidence:**]{.underline} In the code chunks below, provide code from Lab or Challenge assignments where you believe you have demonstrated proficiency with the specified learning target. Be sure to specify **where** the code came from (e.g., Lab 4 Question 2).
 
@@ -1687,6 +1687,40 @@ ca_childcare |>
 ```{r}
 #| label: dvs-3-2
 
+# Lab 2 | Question 16
+
+#| label: rotated-boxplot
+
+ggplot(data = surveys,
+       mapping = aes(x = species, 
+                     y = weight)
+      ) + 
+  
+   geom_boxplot(alpha = 0) +
+  geom_jitter(alpha = 0.1, 
+              color = "steelblue"
+              ) +
+  annotate("text", 
+            x = 6, 
+            y = 150, 
+            label = "*Note: Hispidus may be\nthe most volitaile sample", 
+            color = "blue4", 
+            size = 4, 
+            hjust = 0
+   ) +
+  
+labs(title = "Boxplots of the Weights of Various Species Located in Portal, Arizona.",
+     y = "Weight (grams)",
+     x = "",
+     ) +
+
+#http://www.sthda.com/english/wiki/ggplot2-rotate-a-graph-reverse-and-flip-the-plot
+
+# This function will flip the axis of the graph.
+coord_flip() 
+
+
+#The difference from the original code is the annotation linked to explaining that one of the species that we collected could have discrepancies due to the larger range of data along with the lower density as compared to the other species. 
 ```
 
 -   I can be creative...
@@ -2315,14 +2349,20 @@ ca_childcare |>
 ```{r}
 #| label: dsm-1-1
 
-#Lab 3 Challenge | Question 3
+#Lab 9  | Question 1
 
-#| label: chi-square-test
-# code chunk for Q14
+#| label: function-simulation-for-random-babies
 
-#This function will provide a p-value to determine if there is a relationship between
-#the SET score of a curve and the professors seniority. 
-chisq.test(teacher_evals_compare$SET_level, teacher_evals_compare$sen_level)
+randomBabies <- function(nBabies){
+  assigned <- sample(1:nBabies, nBabies, replace = FALSE)
+  
+  # Count how many are correctly returned (match original positions)
+  sum(assigned == 1:nBabies)
+}
+
+results <- map_int(.x = 1:10000,
+                   .f = ~ randomBabies(4)
+                   )
 
 ```
 
@@ -2330,6 +2370,14 @@ chisq.test(teacher_evals_compare$SET_level, teacher_evals_compare$sen_level)
 
 ```{r}
 #| label: dsm-1-2
+
+#Lab 9 | Question 4
+
+simulate_means <- function(n, df){
+  map_dbl(.x = 1:n, 
+          .f = ~rchisq(n = 100, df = df) %>% mean()
+          )
+}
 
 ```
 
