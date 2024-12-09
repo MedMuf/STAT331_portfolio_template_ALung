@@ -8,10 +8,30 @@ editor: visual
 
 1.  Finish the sentence with another student’s name: "If \[Name of Student\] doesn’t earn an A, then nobody should, because..." Explain your choice and your reasoning.
 
+    1.  If Lisette Susana Abundez doesn't earn an A, then nobody should, because they have shown that they can be creative with their code while being able to create code that is easy to read and to solve the needed questions.
+
+        -   They have a strong foundation as to which they could build off on, and their code is well made while being able to produce the results that they need to explain the data they are working on.
+
 2.  What was the most difficult part of the class for you? List a general topic, a specific problem, a kind of work we did, etc. and explain why.
+
+    1.  The most difficult part of the class for me was trying to be creative.
+
+        -   I just had a difficult time thinking of how to "spice" up my work. I don't often find a point in doing so, but throughout the class, I have found out why it is good to add more to a graph, whether it is to add notes or to simply make a graph more appealing to the reader.
 
 3.  What was the easiest part of the class for you? Explain why.
 
+    1.  The easiest part of my class for me was working with others.
+
+        -   I was able to work and communicate well with anyone that I was paired up with which proved useful in our activities along with outside class. They served as fantastic collaborators.
+
 4.  What part of the class surprised or interested you the most? Explain why.
 
+    1.  The part of the class that surprised me was how versatile R can really be, especially as just a general program.
+
+        -   Although R is primarily a program for working with large datasets, I was taken aback by its ability to create graphs and the sheer amount of customization that is given to the user when doing so.
+
 5.  Give one piece of advice to a student just beginning a quarter of STAT 331 that will help them be successful in learning.
+
+    1.  Don't be afraid to experiment, better to fail and learn something, than do be comfortable and not grow.
+
+        -   I found that it took me far too long to be more experimental and attempt to incorporate what I learned. I took the safer root and tried to only use what I was comfortable with instead of trying to grow my understanding of the aspects that I struggled at or had less of an understanding.
