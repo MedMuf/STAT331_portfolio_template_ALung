@@ -1,4 +1,4 @@
-<<<<<<< HEAD
+
 ---
 title: "STAT 331 Portfolio"
 author: "Alex Lung"
@@ -17,9 +17,9 @@ code-fold: true
 code-tools: true
 ---
 
-[**y Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an \_**B+**\_.
+[**Grade:**]{.underline} I believe my grade equivalent to course work evidenced below to be an \_**B+**\_.
 
-The work that I provided I believe is worthy of a **B+** as I was able to complete a large portion of the learning targets in a sufficient manner. I do believe I did well, but there are aspects that keep me from being any higher as there are some areas, such as not being well versed in using the joins as often as I should or not being more creative. I have made more attempts at implementing them in a way that I am comfortable with and can produce the needed output, but I still try to simplify the code for my sake, showing I need to continue working on my confidence with these functions. The areas that I excelled would be working on my code through revisions, as I have done revisions on all of my works that have been given feedback, whether complete or incomplete. I want to show my willingness to improve through that and how I can improve because of it. 
+The work that I provided I believe is worthy of a **B+** as I was able to complete a large portion of the learning targets in a sufficient manner. I do believe I did well, but there are aspects that keep me from being any higher as there are some areas, such as not being well versed in using the joins as often as I should or not being more creative. This has improved however, especially in Lab 7 (DVS-3-3), as I was able to determine a style that I liked which wasn't the default. I have made more attempts at implementing them in a way that I am comfortable with and can produce the needed output, but I still try to simplify the code for my sake, showing I need to continue working on my confidence with these functions. The areas that I excelled would be working on my code through revisions, as I have done revisions on all of my works that have been given feedback, whether complete or incomplete. I want to show my willingness to improve through that and how I can improve because of it. 
 
 I have also been, in my opinion, a good group mate, as I do my very best to contribute when needed, and to take a back seat and hear my partner out. In my opinion,during the times that I have worked with someone, it could have been considered "fun" working on the code.
 
